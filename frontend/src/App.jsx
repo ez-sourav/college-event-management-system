@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./screens/Auth/Login";
 import Signup from "./screens/Auth/Signup";
+import CreateEvent from "./screens/admin/CreateEvent";
 
 const App = () => {
   return (
@@ -10,6 +11,7 @@ const App = () => {
 
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/createevent" element={<CreateEvent />} />
     </Routes>
   );
 };
