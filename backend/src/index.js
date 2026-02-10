@@ -1,12 +1,21 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectToDB from "./config/db.js";
+import authRouter from "./routers/authRouter.js";
+import eventRouter from "./routers/eventsRouter.js";
+import volunteeringRouter from "./routers/VolunteeringRouter.js";
+import participationsRouter from "./routers/participationsRouter.js";
 
 dotenv.config();
 
 const app = express();
 
 app.use(express.json());
+
+app.use("/auth", authRouter);
+app.use("/events", eventRouter);
+app.use("/volunteering", volunteeringRouter);
+app.use("/participations", participationsRouter);
 
 app.get("/", (req, res) => {
   res.status(200).json({ data: "hello world!" });
