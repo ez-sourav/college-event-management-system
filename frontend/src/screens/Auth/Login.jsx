@@ -3,14 +3,15 @@ import { Mail, Lock, Eye, EyeOff, AlertCircle, LogIn } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { loginUser } from "../../api/authApi";
 import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "../../../hooks/useAuthContext";
 
 export default function Login() {
   const [serverError, setServerError] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { login } = useAuthContext();
 
   const {
     register,
@@ -28,9 +29,15 @@ export default function Login() {
 
       const res = await loginUser(data);
 
-      localStorage.setItem("token", res.token);
+      login(res);
 
-      navigate("/"); // or dashboard
+      if (res.user.role === "ADMIN") {
+        navigate("/admin/dashboard");
+      } else if (res.user.role === "STUDENT") {
+        navigate("/events");
+      } else {
+        navigate("/assigned-events");
+      }
     } catch (error) {
       setServerError(error.response?.data?.message || "Something went wrong!");
     } finally {
@@ -42,7 +49,6 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 px-3 sm:px-4 py-6 sm:py-8 md:py-12">
       <div className="w-full max-w-xs sm:max-w-md md:max-w-lg">
         <div className="bg-white/90 backdrop-blur-md p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl shadow-2xl border border-white/30">
-          
           {/* Header */}
           <div className="text-center mb-6 md:mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-blue-500 to-indigo-600 rounded-2xl mb-4 shadow-lg">
@@ -59,7 +65,6 @@ export default function Login() {
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
-            
             {/* Email */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -216,7 +221,6 @@ export default function Login() {
               </a>
             </p>
           </div>
-
         </div>
       </div>
     </div>
