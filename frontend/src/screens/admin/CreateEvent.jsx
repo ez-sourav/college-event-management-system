@@ -1,4 +1,6 @@
 import { useRef, useState } from "react";
+import axios from "axios";
+
 import {
   Info,
   UploadCloud,
@@ -13,6 +15,7 @@ import {
   Wallet,
   ClipboardList,
   Trophy,
+  CheckCircle2,
 } from "lucide-react";
 
 const UPLOAD_API_URL = "http://localhost:8000/uploads/banner";
@@ -67,15 +70,15 @@ const CreateEvent = () => {
     }
   };
 
-  // UPLOAD IMAGE TO BACKEND 
+  // UPLOAD IMAGE TO BACKEND
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 3 * 1024 * 1024) {
       setErrors((prev) => ({
         ...prev,
-        banner: "File size must be less than 10MB",
+        banner: "File size must be less than 3MB",
       }));
       return;
     }
@@ -91,14 +94,6 @@ const CreateEvent = () => {
       setBannerPreview("");
       setFormData((prev) => ({ ...prev, bannerUrl: "" }));
 
-      //  progress animation (manulally)
-      let progressValue = 0;
-      const interval = setInterval(() => {
-        progressValue += 5;
-        if (progressValue >= 90) progressValue = 90;
-        setUploadProgress(progressValue);
-      }, 200);
-
       const data = new FormData();
       data.append("image", file);
 
@@ -106,7 +101,6 @@ const CreateEvent = () => {
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGI1N2IwNjFhMjg5NDg0MTA3NTI2OCIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MDc5NjgyMCwiZXhwIjoxNzcxNDAxNjIwfQ._MyY38I9iEAzEZCxWjgGD7CYNxFgwbipzdGZpCH2Q_Q";
 
       if (!token) {
-        clearInterval(interval);
         setErrors((prev) => ({
           ...prev,
           banner: "You are not logged in. Please login first.",
@@ -115,28 +109,27 @@ const CreateEvent = () => {
         return;
       }
 
-      const res = await fetch(UPLOAD_API_URL, {
-        method: "POST",
+      const res = await axios.post(UPLOAD_API_URL, data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        body: data,
+        onUploadProgress: (progressEvent) => {
+          if (!progressEvent.total) return;
+
+          const percent = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total,
+          );
+          setUploadProgress(percent);
+        },
       });
 
-      const result = await res.json();
-
-      if (!res.ok) {
-        throw new Error(result.message || "Upload failed");
-      }
-
-      clearInterval(interval);
-
-      setUploadProgress(100);
-
+      // SUCCESS RESPONSE
       setFormData((prev) => ({
         ...prev,
-        bannerUrl: result.url,
+        bannerUrl: res.data.url,
       }));
+
+      setUploadProgress(100);
 
       // Preview after upload success
       const previewUrl = URL.createObjectURL(file);
@@ -148,7 +141,7 @@ const CreateEvent = () => {
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        banner: error.message,
+        banner: error.response?.data?.message || error.message,
       }));
 
       setBannerPreview("");
@@ -295,7 +288,7 @@ const CreateEvent = () => {
       (p) =>
         p.position.trim() !== "" &&
         p.amount.toString().trim() !== "" &&
-        p.perks.trim() !== ""
+        p.perks.trim() !== "",
     );
 
     if (validPrizes.length === 0) {
@@ -340,7 +333,7 @@ const CreateEvent = () => {
             (p) =>
               p.position.trim() !== "" &&
               p.amount.toString().trim() !== "" &&
-              p.perks.trim() !== ""
+              p.perks.trim() !== "",
           )
           .map((p) => ({
             position: p.position,
@@ -386,40 +379,39 @@ const CreateEvent = () => {
   };
 
   const handleCancel = () => {
-  setFormData({
-    eventName: "",
-    description: "",
-    startTime: "",
-    endTime: "",
-    registrationStartDate: "",
-    registrationDeadline: "",
-    venue: "",
-    capacity: "",
-    entryFee: "",
-    teamSizeMin: "",
-    teamSizeMax: "",
-    rules: [""],
-    prizes: [
-      {
-        position: "",
-        amount: "",
-        perks: "",
-      },
-    ],
-    bannerUrl: "",
-  });
+    setFormData({
+      eventName: "",
+      description: "",
+      startTime: "",
+      endTime: "",
+      registrationStartDate: "",
+      registrationDeadline: "",
+      venue: "",
+      capacity: "",
+      entryFee: "",
+      teamSizeMin: "",
+      teamSizeMax: "",
+      rules: [""],
+      prizes: [
+        {
+          position: "",
+          amount: "",
+          perks: "",
+        },
+      ],
+      bannerUrl: "",
+    });
 
-  setErrors({});
-  setBannerPreview("");
-  setUploadProgress(0);
-  setUploading(false);
-  setOpenPreview(false);
+    setErrors({});
+    setBannerPreview("");
+    setUploadProgress(0);
+    setUploading(false);
+    setOpenPreview(false);
 
-  if (fileInputRef.current) {
-    fileInputRef.current.value = "";
-  }
-};
-
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-gray-100">
@@ -428,7 +420,8 @@ const CreateEvent = () => {
           Create New Event
         </h1>
         <p className="text-gray-600 text-sm sm:text-base">
-          Fill in the details below to add a new event to the tech fest schedule.
+          Fill in the details below to add a new event to the tech fest
+          schedule.
         </p>
       </div>
 
@@ -511,29 +504,31 @@ const CreateEvent = () => {
                         : "Click to upload or drag and drop"}
                     </p>
                     <p className="text-sm text-gray-500">
-                      PNG, JPG, GIF up to 10MB
+                      PNG, JPG, GIF up to 3MB
                     </p>
                   </div>
 
-                  {/* Rounded Progress Bar */}
+                  {/*  Progress Bar */}
                   {uploading && (
-                    <div className="w-full max-w-md">
+                    <div className="w-full max-w-md space-y-2">
                       <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                         <div
-                          className="h-3 bg-blue-600 rounded-full transition-all duration-300"
+                          className="h-3 bg-linear-to-r from-blue-500 to-blue-700 rounded-full transition-all duration-300"
                           style={{ width: `${uploadProgress}%` }}
                         ></div>
                       </div>
 
-                      <p className="text-sm text-blue-600 font-semibold mt-2">
-                        Uploading... {uploadProgress}%
-                      </p>
+                      <div className="flex justify-between text-xs font-semibold text-gray-600">
+                        <span>Uploading...</span>
+                        <span>{uploadProgress}%</span>
+                      </div>
                     </div>
                   )}
 
                   {formData.bannerUrl && !uploading && (
-                    <p className="text-sm text-green-600 font-semibold">
-                      Uploaded Successfully 
+                    <p className="text-sm text-green-600 font-semibold flex items-center gap-2">
+                      <CheckCircle2 size={18} className="text-green-600" />
+                      Uploaded Successfully
                     </p>
                   )}
                 </div>
@@ -571,8 +566,6 @@ const CreateEvent = () => {
                       </p>
                     </div>
                   </div>
-
-              
                 </div>
               )}
 
