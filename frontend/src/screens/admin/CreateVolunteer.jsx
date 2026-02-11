@@ -150,8 +150,8 @@ const CreateVolunteer = () => {
       prev.map((event) =>
         event.id === id && !event.disabled
           ? { ...event, selected: !event.selected }
-          : event
-      )
+          : event,
+      ),
     );
 
     setErrors((prev) => ({ ...prev, events: "" }));
@@ -261,7 +261,6 @@ const CreateVolunteer = () => {
                 className="flex flex-col gap-5 flex-1"
                 onSubmit={handleSubmit}
               >
-                
                 <label className="flex flex-col gap-2">
                   <span className="text-sm font-semibold text-[#111218]">
                     Full Name
@@ -295,7 +294,6 @@ const CreateVolunteer = () => {
                   )}
                 </label>
 
-                
                 <label className="flex flex-col gap-2">
                   <span className="text-sm font-semibold text-[#111218]">
                     Email Address
@@ -329,7 +327,6 @@ const CreateVolunteer = () => {
                   )}
                 </label>
 
-                
                 <label className="flex flex-col gap-2">
                   <span className="text-sm font-semibold text-[#111218]">
                     Password
