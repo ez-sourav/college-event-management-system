@@ -43,9 +43,10 @@ const CreateVolunteer = () => {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-      const token = localStorage.getItem("token");
+  const fetchEvents = async () => {
+    try {
+      const auth = JSON.parse(localStorage.getItem("auth"));
+      const token = auth?.token;
 
       if (!token) {
         console.log("Token not found, login required!");
@@ -79,6 +80,7 @@ const CreateVolunteer = () => {
 
   fetchEvents();
 }, []);
+
 
 
 
@@ -185,7 +187,8 @@ const CreateVolunteer = () => {
   if (!isValid) return;
 
   try {
-    const token = localStorage.getItem("token");
+    const auth = JSON.parse(localStorage.getItem("auth"));
+    const token = auth?.token;
 
     if (!token) {
       alert("Login required!");
@@ -208,30 +211,12 @@ const CreateVolunteer = () => {
     });
 
     alert(res.data.message || "Volunteer created and assigned successfully!");
-
-    // RESET FORM
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-      autoGenerate: false,
-    });
-
-    setSearchTerm("");
-    setErrors({ name: "", email: "", password: "", events: "" });
-
-    // UNSELECT ALL EVENTS
-    setEvents((prev) =>
-      prev.map((ev) => ({
-        ...ev,
-        selected: false,
-      }))
-    );
   } catch (error) {
     console.log(error);
     alert(error.response?.data?.message || "Something went wrong!");
   }
 };
+
 
 
 

@@ -98,7 +98,8 @@ const CreateEvent = () => {
       const data = new FormData();
       data.append("image", file);
 
-      const token = localStorage.getItem("token");
+      const auth = JSON.parse(localStorage.getItem("auth"));
+      const token = auth?.token;
 
       if (!token) {
         setErrors((prev) => ({
@@ -351,7 +352,8 @@ const CreateEvent = () => {
       };
 
       try {
-        const token = localStorage.getItem("token");
+        const auth = JSON.parse(localStorage.getItem("auth"));
+        const token = auth?.token;
 
         if (!token) {
           alert("Login required!");
