@@ -17,42 +17,46 @@ import PageNotFound from "./screens/PageNotFound";
 import Unauthorized from "./screens/Unauthorized";
 import GuestRoute from "./components/auth/GuestRoute";
 import RootRedirect from "./components/auth/RootRedirect";
+import Navbar from "./components/UI/Navbar";
 
 const App = () => {
   return (
-    <Routes>
-      <Route path="/" element={<RootRedirect />} />
-      {/* Public Routes */}
-      <Route element={<GuestRoute />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-      </Route>
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<RootRedirect />} />
+        {/* Public Routes */}
+        <Route element={<GuestRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+        </Route>
 
-      {/* ADMIN ROUTES */}
-      <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/create-event" element={<CreateEvent />} />
-        <Route path="/admin/create-volunteer" element={<CreateVolunteer />} />
-      </Route>
+        {/* ADMIN ROUTES */}
+        <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/create-event" element={<CreateEvent />} />
+          <Route path="/admin/create-volunteer" element={<CreateVolunteer />} />
+        </Route>
 
-      {/* PARTICIPANT ROUTES */}
-      <Route element={<ProtectedRoute allowedRoles={["STUDENT"]} />}>
-        <Route path="/events" element={<EventListings />} />
-        <Route path="/events/:id" element={<EventDetails />} />
-        <Route path="/my-ticket" element={<MyTicket />} />
-      </Route>
+        {/* PARTICIPANT ROUTES */}
+        <Route element={<ProtectedRoute allowedRoles={["STUDENT"]} />}>
+          <Route path="/events" element={<EventListings />} />
+          <Route path="/events/:id" element={<EventDetails />} />
+          <Route path="/my-ticket" element={<MyTicket />} />
+        </Route>
 
-      {/* VOLUNTEER ROUTES */}
-      <Route element={<ProtectedRoute allowedRoles={["VOLUNTEER"]} />}>
-        <Route path="/assigned-events" element={<AssignedEvents />} />
-      </Route>
+        {/* VOLUNTEER ROUTES */}
+        <Route element={<ProtectedRoute allowedRoles={["VOLUNTEER"]} />}>
+          <Route path="/assigned-events" element={<AssignedEvents />} />
+        </Route>
 
-      {/*Unauthorized*/}
-      <Route path="/unauthorized" element={<Unauthorized />} />
+        {/*Unauthorized*/}
+        <Route path="/unauthorized" element={<Unauthorized />} />
 
-      {/* Catch All */}
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+        {/* Catch All */}
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    </>
   );
 };
 
