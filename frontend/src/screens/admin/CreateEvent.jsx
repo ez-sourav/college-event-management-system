@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 const UPLOAD_API_URL = "http://localhost:8000/uploads/banner";
+const CREATE_EVENT_API_URL = "http://localhost:8000/events";
 
 const CreateEvent = () => {
   const fileInputRef = useRef(null);
@@ -97,8 +98,7 @@ const CreateEvent = () => {
       const data = new FormData();
       data.append("image", file);
 
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGI1N2IwNjFhMjg5NDg0MTA3NTI2OCIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MDc5NjgyMCwiZXhwIjoxNzcxNDAxNjIwfQ._MyY38I9iEAzEZCxWjgGD7CYNxFgwbipzdGZpCH2Q_Q";
+      const token = localStorage.getItem("token");
 
       if (!token) {
         setErrors((prev) => ({
@@ -237,6 +237,10 @@ const CreateEvent = () => {
       newErrors.eventName = "Event name is required";
     }
 
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+    }
+
     if (!formData.startTime) {
       newErrors.startTime = "Start date & time is required";
     }
@@ -273,6 +277,10 @@ const CreateEvent = () => {
       newErrors.venue = "Venue is required";
     }
 
+    if (!formData.capacity) {
+      newErrors.capacity = "Max capacity is required";
+    }
+
     if (formData.teamSizeMin && formData.teamSizeMax) {
       if (Number(formData.teamSizeMin) > Number(formData.teamSizeMax)) {
         newErrors.teamSizeMax = "Max team size must be greater than Min";
@@ -303,7 +311,7 @@ const CreateEvent = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (uploading) {
@@ -321,7 +329,7 @@ const CreateEvent = () => {
         registrationStartDate: formData.registrationStartDate,
         registrationDeadline: formData.registrationDeadline,
         venue: formData.venue,
-        maxParticipants: formData.capacity ? Number(formData.capacity) : null,
+        maxParticipants: Number(formData.capacity),
         entryFee: formData.entryFee ? Number(formData.entryFee) : 0,
         teamSize: {
           min: formData.teamSizeMin ? Number(formData.teamSizeMin) : 1,
@@ -342,8 +350,27 @@ const CreateEvent = () => {
           })),
       };
 
-      console.log("Final Event Payload:", finalPayload);
-      alert("Event created successfully!");
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          alert("Login required!");
+          return;
+        }
+
+        const res = await axios.post(CREATE_EVENT_API_URL, finalPayload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log("Saved Event:", res.data);
+        alert("Event created successfully!");
+      } catch (error) {
+        alert(error.response?.data?.message || "Event create failed!");
+        console.log(error);
+        return;
+      }
 
       setFormData({
         eventName: "",
@@ -577,7 +604,7 @@ const CreateEvent = () => {
             {/* Description */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-700">
-                Description
+                Description <span className="text-red-500">*</span>
               </label>
 
               <textarea
@@ -588,6 +615,11 @@ const CreateEvent = () => {
                 value={formData.description}
                 onChange={handleChange}
               />
+              {errors.description && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.description}
+                </p>
+              )}
             </div>
           </div>
 
@@ -774,6 +806,9 @@ const CreateEvent = () => {
                     onChange={handleChange}
                   />
                 </div>
+                {errors.capacity && (
+                  <p className="text-sm text-red-500 mt-1">{errors.capacity}</p>
+                )}
               </div>
 
               {/* Entry Fee */}

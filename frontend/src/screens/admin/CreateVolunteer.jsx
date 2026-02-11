@@ -1,4 +1,6 @@
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
+import axios from "axios";
+
 import {
   UserPlus,
   Badge,
@@ -38,88 +40,47 @@ const CreateVolunteer = () => {
     events: "",
   });
 
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      title: "Opening Ceremony & Keynote",
-      status: "Active",
-      statusStyle: "bg-green-100 text-green-800",
-      time: "09:00 AM - 11:30 AM",
-      venue: "Main Auditorium",
-      selected: false,
-      disabled: false,
-    },
-    {
-      id: 2,
-      title: "Robotics Workshop: Level 1",
-      status: "Pending",
-      statusStyle: "bg-yellow-100 text-yellow-800",
-      time: "12:00 PM - 02:00 PM",
-      venue: "Lab Complex B",
-      selected: false,
-      disabled: false,
-    },
-    {
-      id: 3,
-      title: "Lunch Logistics Team",
-      status: "Staff",
-      statusStyle: "bg-blue-100 text-blue-800",
-      time: "11:30 AM - 01:30 PM",
-      venue: "Cafeteria & Lawn",
-      selected: false,
-      disabled: false,
-    },
-    {
-      id: 4,
-      title: "Hackathon: Code Sprint",
-      status: "Tech",
-      statusStyle: "bg-purple-100 text-purple-800",
-      time: "02:00 PM - 06:00 PM",
-      venue: "Tech Hub Hall",
-      selected: false,
-      disabled: false,
-    },
-    {
-      id: 5,
-      title: "Guest Speaker Reception",
-      status: "VIP",
-      statusStyle: "bg-pink-100 text-pink-800",
-      time: "06:00 PM - 07:30 PM",
-      venue: "VIP Lounge",
-      selected: false,
-      disabled: false,
-    },
-    {
-      id: 6,
-      title: "Networking Mixer (Full)",
-      status: "Full",
-      statusStyle: "bg-gray-100 text-gray-800",
-      time: "08:00 PM - 10:00 PM",
-      venue: "Rooftop Terrace",
-      selected: false,
-      disabled: true,
-    },
-    {
-      id: 7,
-      title: "Networking Mixer (Full)",
-      status: "Full",
-      statusStyle: "bg-gray-100 text-gray-800",
-      time: "08:00 PM - 10:00 PM",
-      venue: "Rooftop Terrace",
-      selected: false,
-      disabled: true,
-    },
-    {
-      id: 8,
-      title: "Networking Mixer (Full)",
-      status: "Full",
-      statusStyle: "bg-gray-100 text-gray-800",
-      time: "08:00 PM - 10:00 PM",
-      venue: "Rooftop Terrace",
-      selected: false,
-      disabled: true,
-    },
-  ]);
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        console.log("Token not found, login required!");
+        return;
+      }
+
+      const res = await axios.get("http://localhost:8000/events", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const formattedEvents = res.data.events.map((event) => ({
+        id: event._id,
+        title: event.name,
+        status: "Active",
+        statusStyle: "bg-green-100 text-green-800",
+        time: `${new Date(event.startTime).toLocaleString()} - ${new Date(
+          event.endTime
+        ).toLocaleString()}`,
+        venue: event.venue,
+        selected: false,
+        disabled: false,
+      }));
+
+      setEvents(formattedEvents);
+    } catch (error) {
+      console.log("Fetch events error:", error);
+    }
+  };
+
+  fetchEvents();
+}, []);
+
+
 
   const generatePassword = (length = 10) => {
     const chars =
@@ -217,22 +178,63 @@ const CreateVolunteer = () => {
     return true;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const isValid = validateForm();
-    if (!isValid) return;
+  const isValid = validateForm();
+  if (!isValid) return;
+
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Login required!");
+      return;
+    }
 
     const selectedEvents = events.filter((e) => e.selected);
 
     const payload = {
-      ...formData,
-      assignedEvents: selectedEvents,
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      events: selectedEvents.map((e) => e.id),
     };
 
-    console.log("Volunteer Create Payload:", payload);
-    alert("Volunteer Created + Events Assigned Successfully!");
-  };
+    const res = await axios.post("http://localhost:8000/volunteering", payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    alert(res.data.message || "Volunteer created and assigned successfully!");
+
+    // RESET FORM
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      autoGenerate: false,
+    });
+
+    setSearchTerm("");
+    setErrors({ name: "", email: "", password: "", events: "" });
+
+    // UNSELECT ALL EVENTS
+    setEvents((prev) =>
+      prev.map((ev) => ({
+        ...ev,
+        selected: false,
+      }))
+    );
+  } catch (error) {
+    console.log(error);
+    alert(error.response?.data?.message || "Something went wrong!");
+  }
+};
+
+
+
 
   return (
     <div className="bg-gray-200 text-[#111218] min-h-screen flex flex-col font-sans pb-20 lg:pb-0">
@@ -534,7 +536,7 @@ const CreateVolunteer = () => {
       {/* for Mobile version  Button */}
       <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-300 p-4 shadow-lg z-50">
         <button
-          onClick={handleSubmit}
+          onClick={(e) => handleSubmit(e)}
           className="w-full h-12 bg-[#1121d4] hover:bg-[#1121d4]/90 text-white rounded-lg font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2"
         >
           <Save size={18} />
