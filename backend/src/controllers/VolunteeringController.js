@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Volunteering from "../models/Volunteering.js";
+import Participation from "../models/Participation.js";
 
 // POST /volunteering (assign volunteer)
 export async function createAndAssignVolunteer(req, res) {
@@ -60,9 +61,25 @@ export async function getAssignedEvents(req, res) {
     res.status(401).json({ message: "User is not authenticated" });
   }
 
-  const assignedEvents = await Volunteering.find({ userId }).populate({
-    path: "eventId",
-  });
+  const assignments = await Volunteering.find({ userId }).populate("eventId");
 
-  return res.status(200).json({ assignedEvents });
+  const eventsWithStats = await Promise.all(
+    assignments.map(async (assignment) => {
+      const event = assignment.eventId;
+
+      const totalCheckedIn = await Participation.countDocuments({
+        eventId: event._id,
+        checkedIn: true,
+      });
+
+      return {
+        ...event.toObject(),
+        totalCheckedIn,
+      };
+    }),
+  );
+
+  res.status(200).json({
+    assignedEvents: eventsWithStats,
+  });
 }

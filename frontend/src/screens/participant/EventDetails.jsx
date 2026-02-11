@@ -48,7 +48,7 @@ export default function EventDetails() {
         });
         const data = await res.json();
         console.log(data);
-        setEvent(data.event);
+        setEvent(data);
       } catch (error) {
         console.error(error);
       } finally {
@@ -205,10 +205,15 @@ export default function EventDetails() {
         </div>
 
         <button
-          className="bg-linear-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition"
+          disabled={event.hasRegistered}
+          className="bg-linear-to-r cursor-pointer from-blue-600 to-indigo-600 hover:opacity-90 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition"
           onClick={handleRegistration}
         >
-          {isRegistering ? "Registering..." : "Register Now →"}
+          {event.hasRegistered
+            ? "Already registered!"
+            : isRegistering
+              ? "Registering..."
+              : "Register Now →"}
         </button>
       </div>
     </div>

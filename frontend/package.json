@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
+    "@yudiel/react-qr-scanner": "^2.5.1",
     "axios": "^1.13.5",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.1.0",

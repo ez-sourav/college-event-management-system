@@ -76,11 +76,14 @@ export async function getEventVolunteers(req, res) {
 // GET /events/:eventId
 export async function getEventDetails(req, res) {
   const eventId = req.params.eventId;
+  const userId = req.user.id;
 
   const event = await Event.findById(eventId);
   if (!event) {
     return res.status(404).json({ message: "Event with this id not found" });
   }
 
-  res.status(200).json({ event });
+  const hasRegistered = !!(await Participation.findOne({ eventId, userId }));
+
+  res.status(200).json({ ...event.toObject(), hasRegistered });
 }

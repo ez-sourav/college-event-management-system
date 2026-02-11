@@ -1,139 +1,133 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import axios from "axios";
 import { Search } from "lucide-react";
 import EventCard from "../../components/volunteer/EventCard";
+import { useAuthContext } from "../../../hooks/useAuthContext";
 
 const AssignedEvents = () => {
+  const { auth } = useAuthContext();
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [assignedEvents, setAssignedEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const events = [
-    {
-      id: 1,
-      title: "AI Robotics Workshop",
-      type: "Workshop",
-      status: "active",
-      time: "09:00 AM - 11:00 AM",
-      location: "Engineering Block, Room 304",
-      checked: 45,
-      total: 60,
-      locked: false,
-      image:
-        "https://images.unsplash.com/photo-1526378722484-bd91ca387e72?w=600",
-    },
-    {
-      id: 2,
-      title: "Future of Tech: Keynote",
-      type: "Keynote",
-      status: "soon",
-      time: "01:00 PM - 03:00 PM",
-      location: "Main Auditorium Hall",
-      checked: 312,
-      total: 500,
-      locked: false,
-      image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=600",
-    },
-    {
-      id: 3,
-      title: "Hackathon: Final Round",
-      type: "Competition",
-      status: "upcoming",
-      time: "04:00 PM - 08:00 PM",
-      location: "Innovation Hub, Lab 1",
-      checked: 0,
-      total: 80,
-      locked: true,
-      image:
-        "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600",
-    },
-  ];
+  // ✅ Fetch Assigned Events
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await axios.get("http://localhost:8000/volunteering/me", {
+          headers: {
+            Authorization: `Bearer ${auth.token}`,
+          },
+        });
 
-  const filteredEvents = events.filter((event) => {
-    const matchesSearch =
-      event.title.toLowerCase().includes(search.toLowerCase()) ||
-      event.location.toLowerCase().includes(search.toLowerCase());
+        const events = res.data.assignedEvents;
 
-    if (filter === "all") return matchesSearch;
-    if (filter === "active") return matchesSearch && event.status === "active";
-    if (filter === "upcoming")
-      return matchesSearch && event.status !== "active";
+        setAssignedEvents(events);
+      } catch (error) {
+        console.error("Error fetching assigned events:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return matchesSearch;
-  });
+    if (auth?.token) {
+      fetchEvents();
+    }
+  }, [auth]);
+
+  console.log(assignedEvents);
+
+  // ✅ Derived Filtered Events
+  const filteredEvents = useMemo(() => {
+    return assignedEvents.filter((event) => {
+      const now = new Date();
+      const start = new Date(event.startTime);
+      const end = new Date(event.endTime);
+
+      const isLive = now >= start && now <= end;
+      const isUpcoming = now < start;
+      const isCompleted = now > end;
+
+      // 🔎 Search match (name + venue)
+      const matchesSearch =
+        event.name.toLowerCase().includes(search.toLowerCase()) ||
+        event.venue.toLowerCase().includes(search.toLowerCase());
+
+      if (!matchesSearch) return false;
+
+      // 🎯 Filter logic
+      if (filter === "live") return isLive;
+      if (filter === "upcoming") return isUpcoming;
+      if (filter === "completed") return isCompleted;
+
+      return true; // all
+    });
+  }, [assignedEvents, search, filter]);
+
+  if (loading) {
+    return (
+      <div className="p-10 text-center text-gray-600">
+        Loading assigned events...
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 sm:px-8 lg:px-10 py-6 bg-[#f6f6f8] min-h-screen">
       {/* Header */}
       <div className="flex flex-col gap-3">
-        <h2 className="font-black text-2xl sm:text-3xl">
-          Welcome Back, <span className="text-blue-700">Name</span>!
-        </h2>
+        <h2 className="font-black text-2xl sm:text-3xl">Assigned Events</h2>
 
         <p className="text-gray-500 text-sm sm:text-base max-w-3xl">
           You have{" "}
           <span className="text-blue-800 font-semibold">
-            {events.length} assigned events
+            {filteredEvents.length}
           </span>{" "}
-          today. Select an event below to begin managing check-ins and accessing
-          scanner tools.
+          assigned events.
         </p>
 
         {/* Search + Filters */}
         <div className="mt-4 bg-white border border-gray-200 rounded-2xl px-4 py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 shadow-sm">
-          {/* Search */}
+          {/* 🔎 Search */}
           <div className="flex items-center gap-3 w-full lg:max-w-md bg-gray-50 px-3 py-2 rounded-xl border border-gray-200">
             <Search className="text-gray-400" size={18} />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               type="text"
-              placeholder="Search event by name or location..."
-              className="w-full bg-transparent outline-none text-sm sm:text-base placeholder-gray-400"
+              placeholder="Search by event name or venue..."
+              className="w-full bg-transparent outline-none text-sm placeholder-gray-400"
             />
           </div>
 
-          {/* Filters */}
-          <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:w-auto sm:gap-3">
-            <button
-              onClick={() => setFilter("all")}
-              className={`py-2 px-2 sm:px-5 text-xs sm:text-sm rounded-lg font-semibold transition ${
-                filter === "all"
-                  ? "bg-blue-700 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              All Events
-            </button>
-
-            <button
-              onClick={() => setFilter("active")}
-              className={`py-2 px-2 sm:px-5 text-xs sm:text-sm rounded-lg font-semibold transition ${
-                filter === "active"
-                  ? "bg-blue-700 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              Active Now
-            </button>
-
-            <button
-              onClick={() => setFilter("upcoming")}
-              className={`py-2 px-2 sm:px-5 text-xs sm:text-sm rounded-lg font-semibold transition ${
-                filter === "upcoming"
-                  ? "bg-blue-700 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              Upcoming
-            </button>
+          {/* 🎯 Filters */}
+          <div className="grid grid-cols-4 gap-2 sm:flex sm:w-auto sm:gap-3">
+            {["all", "live", "upcoming", "completed"].map((type) => (
+              <button
+                key={type}
+                onClick={() => setFilter(type)}
+                className={`py-2 px-4 text-xs sm:text-sm rounded-lg font-semibold transition capitalize
+                  ${
+                    filter === type
+                      ? "bg-blue-700 text-white"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }
+                `}
+              >
+                {type}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Event Cards Grid */}
+      {/* Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 my-8">
         {filteredEvents.length > 0 ? (
           filteredEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <EventCard key={event._id} event={event} />
           ))
         ) : (
           <p className="text-gray-500 text-sm col-span-full text-center py-10">

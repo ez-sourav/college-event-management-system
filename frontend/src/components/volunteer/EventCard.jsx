@@ -1,99 +1,98 @@
 import React from "react";
-import { CalendarDays, MapPin, QrCode, Lock } from "lucide-react";
+import { CalendarDays, MapPin, QrCode } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const EventCard = ({ event }) => {
-  const percent =
-    event.total === 0 ? 0 : Math.round((event.checked / event.total) * 100);
+  const navigate = useNavigate();
+
+  const startDate = new Date(event.startTime);
+  const endDate = new Date(event.endTime);
+
+  const isLive = new Date() >= startDate && new Date() <= endDate;
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden w-full shadow-md border border-gray-100 hover:-translate-y-1 transition duration-300">
-      {/* Image Section */}
+      {/* Banner */}
       <div className="relative">
-        <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold">
-          {event.type}
-        </span>
+        {event.bannerImageUrl ? (
+          <img
+            src={event.bannerImageUrl}
+            alt={event.name}
+            className="w-full h-44 sm:h-48 object-cover"
+          />
+        ) : (
+          <div className="w-full h-44 sm:h-48 bg-gray-200 flex items-center justify-center text-gray-500">
+            No Banner
+          </div>
+        )}
 
+        <div className="absolute inset-0 bg-black/20" />
+
+        {/* Status Badge */}
         <span
-          className={`absolute top-3 right-3 text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold border
+          className={`absolute top-3 right-3 text-xs px-3 py-1 rounded-full font-semibold
             ${
-              event.status === "active"
-                ? "bg-green-100 text-green-700 border-green-200"
-                : event.status === "soon"
-                ? "bg-amber-100 text-amber-700 border-amber-200"
-                : "bg-gray-100 text-gray-600 border-gray-200"
+              isLive
+                ? "bg-green-100 text-green-700"
+                : "bg-gray-200 text-gray-600"
             }
           `}
         >
-          {event.status === "active"
-            ? "Active Now"
-            : event.status === "soon"
-            ? "Starts Soon"
-            : "Upcoming"}
+          {isLive ? "Live Now" : "Upcoming"}
         </span>
-
-        <img
-          className="w-full h-44 sm:h-48 object-cover"
-          src={event.image}
-          alt={event.title}
-        />
-
-        <div className="absolute inset-0 bg-black/20"></div>
       </div>
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-bold text-base sm:text-lg">{event.title}</h3>
+        <h3 className="font-bold text-lg mb-2 line-clamp-1">{event.name}</h3>
 
-        <div className="mt-2 text-xs sm:text-sm text-gray-600 space-y-1">
+        <div className="text-sm text-gray-600 space-y-2">
           <p className="flex items-center gap-2">
-            <CalendarDays size={16} className="text-blue-700" />
-            {event.time}
+            <CalendarDays size={16} className="text-blue-600" />
+            {startDate.toLocaleDateString()} •{" "}
+            {startDate.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </p>
 
           <p className="flex items-center gap-2">
-            <MapPin size={16} className="text-blue-700" />
-            {event.location}
+            <MapPin size={16} className="text-blue-600" />
+            {event.venue}
           </p>
         </div>
 
-        {/* Progress */}
-        <div className="mt-4">
-          <div className="flex justify-between text-[11px] sm:text-xs text-gray-500 mb-1">
-            <span>Check-ins</span>
-            <span>
-              {event.checked} / {event.total}
-            </span>
-          </div>
+        {/* Capacity Info */}
+        <div className="mt-3 text-xs text-gray-500">
+          Max Participants: {event.maxParticipants}
+        </div>
 
+        <div className="mt-2">
           <div className="w-full bg-gray-200 h-2 rounded-full">
             <div
-              className={`h-2 rounded-full ${
-                event.status === "soon"
-                  ? "bg-amber-500"
-                  : event.status === "active"
-                  ? "bg-blue-600"
-                  : "bg-gray-400"
-              }`}
-              style={{ width: `${percent}%` }}
-            ></div>
+              className="h-2 bg-blue-600 rounded-full"
+              style={{
+                width: `${(event.totalCheckedIn / event.maxParticipants) * 100}%`,
+              }}
+            />
           </div>
         </div>
 
-        {/* Button */}
-        {event.locked ? (
-          <button
-            disabled
-            className="mt-4 w-full bg-gray-200 text-gray-500 py-2 rounded-lg transition flex items-center justify-center gap-2 cursor-not-allowed font-semibold text-sm"
-          >
-            <Lock size={18} />
-            Locked
-          </button>
-        ) : (
-          <button className="mt-4 w-full bg-blue-700 text-white py-2 rounded-lg hover:bg-blue-800 transition flex items-center justify-center gap-2 font-semibold text-sm">
-            <QrCode size={18} />
-            Start Scanning
-          </button>
-        )}
+        {/* Start Scanning Button */}
+        <button
+          onClick={() => navigate(`/scan/${event._id}`)}
+          className={`mt-5 w-full cursor-pointer py-2 rounded-lg transition font-semibold text-sm flex items-center justify-center gap-2
+            ${
+              isLive
+                ? "bg-blue-700 text-white hover:bg-blue-800"
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+            }
+          `}
+          disabled={!isLive}
+        >
+          <QrCode size={18} />
+          Start Scanning
+        </button>
       </div>
     </div>
   );

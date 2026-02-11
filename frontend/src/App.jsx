@@ -18,6 +18,7 @@ import Unauthorized from "./screens/Unauthorized";
 import GuestRoute from "./components/auth/GuestRoute";
 import RootRedirect from "./components/auth/RootRedirect";
 import Navbar from "./components/UI/Navbar";
+import QrScanner from "./screens/volunteer/QrScanner";
 
 const App = () => {
   return (
@@ -48,6 +49,7 @@ const App = () => {
         {/* VOLUNTEER ROUTES */}
         <Route element={<ProtectedRoute allowedRoles={["VOLUNTEER"]} />}>
           <Route path="/assigned-events" element={<AssignedEvents />} />
+          <Route path="/scan/:eventId" element={<QrScanner />} />
         </Route>
 
         {/*Unauthorized*/}
