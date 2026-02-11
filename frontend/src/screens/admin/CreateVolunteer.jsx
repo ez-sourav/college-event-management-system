@@ -17,6 +17,34 @@ import {
 } from "lucide-react";
 
 const CreateVolunteer = () => {
+  const formatEventTime = (start, end) => {
+    const startDate = start.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+
+    const startTime = start.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    const endDate = end.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+
+    const endTime = end.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    return `${startDate}, ${startTime} → ${endDate}, ${endTime}`;
+  };
+
   const nameRef = useRef(null);
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
@@ -43,46 +71,64 @@ const CreateVolunteer = () => {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-  const fetchEvents = async () => {
-    try {
-      const auth = JSON.parse(localStorage.getItem("auth"));
-      const token = auth?.token;
+    const fetchEvents = async () => {
+      try {
+        const auth = JSON.parse(localStorage.getItem("auth"));
+        const token = auth?.token;
 
-      if (!token) {
-        console.log("Token not found, login required!");
-        return;
+        if (!token) {
+          console.log("Token not found, login required!");
+          return;
+        }
+
+        const res = await axios.get("http://localhost:8000/events", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const formattedEvents = res.data.events
+          .map((event) => {
+            const now = new Date();
+            const start = new Date(event.startTime);
+            const end = new Date(event.endTime);
+
+            let status = "";
+            let statusStyle = "";
+
+            if (now < start) {
+              status = "Upcoming";
+              statusStyle = "bg-yellow-100 text-yellow-800";
+            } else if (now >= start && now <= end) {
+              status = "Active";
+              statusStyle = "bg-green-100 text-green-800";
+            } else {
+              status = "Completed";
+              statusStyle = "bg-gray-200 text-gray-700";
+            }
+
+            return {
+              id: event._id,
+              title: event.name,
+              status,
+              statusStyle,
+              time: formatEventTime(start, end),
+              venue: event.venue,
+              selected: false,
+              disabled: status === "Completed",
+              endTime: event.endTime,
+            };
+          })
+          .filter((event) => event.status !== "Completed"); // remove completed events
+
+        setEvents(formattedEvents);
+      } catch (error) {
+        console.log("Fetch events error:", error);
       }
+    };
 
-      const res = await axios.get("http://localhost:8000/events", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const formattedEvents = res.data.events.map((event) => ({
-        id: event._id,
-        title: event.name,
-        status: "Active",
-        statusStyle: "bg-green-100 text-green-800",
-        time: `${new Date(event.startTime).toLocaleString()} - ${new Date(
-          event.endTime
-        ).toLocaleString()}`,
-        venue: event.venue,
-        selected: false,
-        disabled: false,
-      }));
-
-      setEvents(formattedEvents);
-    } catch (error) {
-      console.log("Fetch events error:", error);
-    }
-  };
-
-  fetchEvents();
-}, []);
-
-
-
+    fetchEvents();
+  }, []);
 
   const generatePassword = (length = 10) => {
     const chars =
@@ -181,45 +227,45 @@ const CreateVolunteer = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const isValid = validateForm();
-  if (!isValid) return;
+    const isValid = validateForm();
+    if (!isValid) return;
 
-  try {
-    const auth = JSON.parse(localStorage.getItem("auth"));
-    const token = auth?.token;
+    try {
+      const auth = JSON.parse(localStorage.getItem("auth"));
+      const token = auth?.token;
 
-    if (!token) {
-      alert("Login required!");
-      return;
+      if (!token) {
+        alert("Login required!");
+        return;
+      }
+
+      const selectedEvents = events.filter((e) => e.selected);
+
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        events: selectedEvents.map((e) => e.id),
+      };
+
+      const res = await axios.post(
+        "http://localhost:8000/volunteering",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      alert(res.data.message || "Volunteer created and assigned successfully!");
+    } catch (error) {
+      console.log(error);
+      alert(error.response?.data?.message || "Something went wrong!");
     }
-
-    const selectedEvents = events.filter((e) => e.selected);
-
-    const payload = {
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      events: selectedEvents.map((e) => e.id),
-    };
-
-    const res = await axios.post("http://localhost:8000/volunteering", payload, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    alert(res.data.message || "Volunteer created and assigned successfully!");
-  } catch (error) {
-    console.log(error);
-    alert(error.response?.data?.message || "Something went wrong!");
-  }
-};
-
-
-
-
+  };
 
   return (
     <div className="bg-gray-200 text-[#111218] min-h-screen flex flex-col font-sans pb-20 lg:pb-0">
@@ -459,47 +505,61 @@ const CreateVolunteer = () => {
                   return (
                     <label
                       key={event.id}
-                      className={`group relative flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl cursor-pointer transition-all hover:shadow-md
-                      ${
-                        selected
-                          ? "border-2 border-[#1121d4] bg-[#1121d4]/5"
-                          : "border border-[#e5e7eb] bg-white hover:border-[#1121d4]/50"
-                      }
-                      ${event.disabled ? "opacity-60 cursor-not-allowed" : ""}
-                      `}
+                      className={`group relative flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 p-4 rounded-xl cursor-pointer transition-all hover:shadow-md
+  ${
+    selected
+      ? "border-2 border-[#1121d4] bg-[#1121d4]/5"
+      : "border border-[#e5e7eb] bg-white hover:border-[#1121d4]/50"
+  }
+  ${event.disabled ? "opacity-60 cursor-not-allowed" : ""}
+  `}
                     >
-                      <div className="pt-1">
+                      {/* Top Row (Checkbox + Status) */}
+                      <div className="flex items-start justify-between w-full sm:w-auto gap-3">
                         <input
                           checked={event.selected}
                           disabled={event.disabled}
                           onChange={() => handleToggleEvent(event.id)}
-                          className="w-5 h-5 text-[#1121d4] border-gray-300 rounded focus:ring-[#1121d4]"
+                          className="w-5 h-5 mt-1 text-[#1121d4] border-gray-300 rounded focus:ring-[#1121d4]"
                           type="checkbox"
                         />
+
+                        <span
+                          className={`sm:hidden w-fit inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${event.statusStyle}`}
+                        >
+                          {event.status}
+                        </span>
                       </div>
 
-                      <div className="flex-1">
+                      {/* Content */}
+                      <div className="flex-1 w-full">
+                        {/* Title + Status Desktop */}
                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                          <h3 className="font-bold text-[#111218] text-base">
+                          <h3 className="font-bold text-[#111218] text-base sm:text-lg leading-snug wrapwrap--break-words">
                             {event.title}
                           </h3>
 
                           <span
-                            className={`w-fit inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${event.statusStyle}`}
+                            className={`hidden sm:inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-semibold ${event.statusStyle}`}
                           >
                             {event.status}
                           </span>
                         </div>
 
-                        <div className="mt-2 flex flex-col sm:flex-row flex-wrap gap-x-6 gap-y-2 text-sm text-[#616589]">
-                          <div className="flex items-center gap-1.5">
-                            <Calendar size={16} />
-                            {event.time}
+                        {/* Date + Venue */}
+                        <div className="mt-3 flex flex-col gap-2 text-sm text-[#616589]">
+                          <div className="flex items-start gap-2">
+                            <Calendar size={16} className="mt-0.5 shrink-0" />
+                            <span className="leading-snug wrap-break-words">
+                              {event.time}
+                            </span>
                           </div>
 
-                          <div className="flex items-center gap-1.5">
-                            <MapPin size={16} />
-                            {event.venue}
+                          <div className="flex items-start gap-2">
+                            <MapPin size={16} className="mt-0.5 shrink-0" />
+                            <span className="leading-snug wrap-break-words">
+                              {event.venue}
+                            </span>
                           </div>
                         </div>
                       </div>
