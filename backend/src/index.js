@@ -11,6 +11,8 @@ import volunteeringRouter from "./routers/VolunteeringRouter.js";
 import participationsRouter from "./routers/participationsRouter.js";
 import { requireAuth } from "./middlewares/requireAuth.js";
 import { errorMiddleware } from "./middlewares/errorMiddleware.js";
+import adminRouter from "./routers/adminRouter.js";
+
 
 dotenv.config();
 
@@ -35,6 +37,8 @@ app.use("/uploads", requireAuth, uploadsRouter);
 app.use("/events", requireAuth, eventRouter);
 app.use("/volunteering", requireAuth, volunteeringRouter);
 app.use("/participations", requireAuth, participationsRouter);
+app.use("/admin", requireAuth, adminRouter);
+
 
 app.get("/", (req, res) => {
   res.status(200).json({ data: "hello world!" });

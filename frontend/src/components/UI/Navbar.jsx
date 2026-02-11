@@ -64,7 +64,7 @@ export default function Navbar() {
             <Ticket size={18} className="text-white" />
           </div>
 
-          <h2 className="text-lg sm:text-xl font-bold bg-linear-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
             Eventify
           </h2>
         </Link>
