@@ -3,28 +3,32 @@ import { createContext, useEffect, useState } from "react";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [auth, setAuth] = useState(() => {
+    const data = localStorage.getItem("auth") || null;
+    if (!data) return data;
+    return JSON.parse(data);
+  });
 
-  const isAuthenticated = !!token;
+  const isAuthenticated = !!auth;
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem("token", token);
-    } else {
-      localStorage.removeItem("token");
-    }
-  }, [token]);
+  if (auth) {
+    localStorage.setItem("auth", JSON.stringify(auth));
+  } else {
+    localStorage.removeItem("auth");
+  }
+}, [auth]);
 
-  const login = (newToken) => {
-    setToken(newToken);
+  const login = (newAuth) => {
+    setAuth(newAuth);
   };
 
   const logout = () => {
-    setToken(null);
+    setAuth(null);
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, isAuthenticated }}>
+    <AuthContext.Provider value={{ auth, login, logout, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );

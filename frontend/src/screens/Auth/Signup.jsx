@@ -1,8 +1,17 @@
 import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, User, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  User,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { signupUser } from "../../api/authApi";
+import { useAuthContext } from "../../../hooks/useAuthContext";
 
 export default function Signup() {
   const [serverError, setServerError] = useState("");
@@ -13,6 +22,7 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { login } = useAuthContext();
 
   const {
     register,
@@ -35,11 +45,20 @@ export default function Signup() {
         name: data.name,
         email: data.email,
         password: data.password,
-        role: "STUDENT", 
+        role: "STUDENT",
       });
 
       setSuccessMsg(res.message);
-      navigate("/login");
+      // navigate("/login")
+      login(res);
+
+      if (res.user.role === "ADMIN") {
+        navigate("/admin/dashboard");
+      } else if (res.user.role === "STUDENT") {
+        navigate("/events");
+      } else {
+        navigate("/assigned-events");
+      }
     } catch (error) {
       setServerError(error.response?.data?.message || "Signup failed!");
     } finally {
@@ -73,7 +92,9 @@ export default function Signup() {
 
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className={`h-5 w-5 transition-colors ${errors.name ? 'text-red-400' : 'text-gray-400'}`} />
+                  <User
+                    className={`h-5 w-5 transition-colors ${errors.name ? "text-red-400" : "text-gray-400"}`}
+                  />
                 </div>
 
                 <input
@@ -81,8 +102,8 @@ export default function Signup() {
                   placeholder="Raj Kumar"
                   className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-xl focus:ring-4 outline-none transition-all duration-200 bg-white text-sm ${
                     errors.name
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                      : 'border-gray-200 focus:border-blue-500 focus:ring-blue-500/10'
+                      ? "border-red-300 focus:border-red-500 focus:ring-red-500/10"
+                      : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/10"
                   }`}
                   {...register("name", {
                     required: "Full name is required",
@@ -116,7 +137,9 @@ export default function Signup() {
 
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className={`h-5 w-5 transition-colors ${errors.email ? 'text-red-400' : 'text-gray-400'}`} />
+                  <Mail
+                    className={`h-5 w-5 transition-colors ${errors.email ? "text-red-400" : "text-gray-400"}`}
+                  />
                 </div>
 
                 <input
@@ -124,8 +147,8 @@ export default function Signup() {
                   placeholder="you@example.com"
                   className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-xl focus:ring-4 outline-none transition-all duration-200 bg-white text-sm ${
                     errors.email
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                      : 'border-gray-200 focus:border-blue-500 focus:ring-blue-500/10'
+                      ? "border-red-300 focus:border-red-500 focus:ring-red-500/10"
+                      : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/10"
                   }`}
                   {...register("email", {
                     required: "Email is required",
@@ -159,7 +182,9 @@ export default function Signup() {
 
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className={`h-5 w-5 transition-colors ${errors.password ? 'text-red-400' : 'text-gray-400'}`} />
+                  <Lock
+                    className={`h-5 w-5 transition-colors ${errors.password ? "text-red-400" : "text-gray-400"}`}
+                  />
                 </div>
 
                 <input
@@ -167,22 +192,22 @@ export default function Signup() {
                   placeholder="Create a password"
                   className={`w-full pl-10 pr-12 py-2.5 sm:py-3 border-2 rounded-xl focus:ring-4 outline-none transition-all duration-200 bg-white text-sm ${
                     errors.password
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                      : 'border-gray-200 focus:border-blue-500 focus:ring-blue-500/10'
+                      ? "border-red-300 focus:border-red-500 focus:ring-red-500/10"
+                      : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/10"
                   }`}
                   {...register("password", {
-  required: "Password is required",
-  minLength: {
-    value: 8,
-    message: "Password must be at least 8 characters",
-  },
-  pattern: {
-    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-    message:
-      "Password must include uppercase, lowercase, number & special character",
-  },
-})}
-
+                    required: "Password is required",
+                    minLength: {
+                      value: 8,
+                      message: "Password must be at least 8 characters",
+                    },
+                    pattern: {
+                      value:
+                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                      message:
+                        "Password must include uppercase, lowercase, number & special character",
+                    },
+                  })}
                 />
 
                 {passwordValue.length > 0 && (
@@ -203,11 +228,11 @@ export default function Signup() {
               {errors.password && (
                 <div className="flex items-center gap-1.5 mt-1.5 text-red-600">
                   <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                  <p className="text-xs font-medium">{errors.password.message}</p>
+                  <p className="text-xs font-medium">
+                    {errors.password.message}
+                  </p>
                 </div>
               )}
-
-             
             </div>
 
             {/* Confirm Password Field */}
@@ -218,7 +243,9 @@ export default function Signup() {
 
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className={`h-5 w-5 transition-colors ${errors.confirmPassword ? 'text-red-400' : 'text-gray-400'}`} />
+                  <Lock
+                    className={`h-5 w-5 transition-colors ${errors.confirmPassword ? "text-red-400" : "text-gray-400"}`}
+                  />
                 </div>
 
                 <input
@@ -226,10 +253,11 @@ export default function Signup() {
                   placeholder="Confirm your password"
                   className={`w-full pl-10 pr-12 py-2.5 sm:py-3 border-2 rounded-xl focus:ring-4 outline-none transition-all duration-200 bg-white text-sm ${
                     errors.confirmPassword
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                      : confirmPasswordValue && confirmPasswordValue === password
-                      ? 'border-green-300 focus:border-green-500 focus:ring-green-500/10'
-                      : 'border-gray-200 focus:border-blue-500 focus:ring-blue-500/10'
+                      ? "border-red-300 focus:border-red-500 focus:ring-red-500/10"
+                      : confirmPasswordValue &&
+                          confirmPasswordValue === password
+                        ? "border-green-300 focus:border-green-500 focus:ring-green-500/10"
+                        : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/10"
                   }`}
                   {...register("confirmPassword", {
                     required: "Confirm password is required",
@@ -252,26 +280,32 @@ export default function Signup() {
                   </button>
                 )}
 
-                {!errors.confirmPassword && confirmPasswordValue && confirmPasswordValue === password && (
-                  <div className="absolute inset-y-0 right-12 pr-3 flex items-center pointer-events-none">
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  </div>
-                )}
+                {!errors.confirmPassword &&
+                  confirmPasswordValue &&
+                  confirmPasswordValue === password && (
+                    <div className="absolute inset-y-0 right-12 pr-3 flex items-center pointer-events-none">
+                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    </div>
+                  )}
               </div>
 
               {errors.confirmPassword && (
                 <div className="flex items-center gap-1.5 mt-1.5 text-red-600">
                   <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                  <p className="text-xs font-medium">{errors.confirmPassword.message}</p>
+                  <p className="text-xs font-medium">
+                    {errors.confirmPassword.message}
+                  </p>
                 </div>
               )}
 
-              {!errors.confirmPassword && confirmPasswordValue && confirmPasswordValue === password && (
-                <div className="flex items-center gap-1.5 mt-1.5 text-green-600">
-                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                  <p className="text-xs font-medium">Passwords match</p>
-                </div>
-              )}
+              {!errors.confirmPassword &&
+                confirmPasswordValue &&
+                confirmPasswordValue === password && (
+                  <div className="flex items-center gap-1.5 mt-1.5 text-green-600">
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                    <p className="text-xs font-medium">Passwords match</p>
+                  </div>
+                )}
             </div>
 
             {/* Server Error Alert */}
@@ -309,8 +343,20 @@ export default function Signup() {
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
                   </svg>
                   Creating Account...
                 </span>

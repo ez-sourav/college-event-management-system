@@ -23,9 +23,11 @@ export async function signup(req, res) {
     role,
   });
 
-  const token = signToken({ id: user.id, role: user.role });
+  const payload = { id: user.id, role: user.role, name: user.name };
 
-  res.status(201).json({ message: "User successfully created!", token });
+  const token = signToken(payload);
+
+  res.status(201).json({ token, user: payload });
 }
 
 export async function login(req, res) {
@@ -43,5 +45,8 @@ export async function login(req, res) {
 
   const token = signToken({ id: userFound.id, role: userFound.role });
 
-  res.status(200).json({ message: "Successfully logged in!", token });
+  res.status(200).json({
+    token,
+    user: { id: userFound.id, role: userFound.role, name: userFound.name },
+  });
 }

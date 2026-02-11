@@ -1,6 +1,4 @@
 import {
-  Ticket,
-  Bell,
   CalendarDays,
   MapPin,
   BadgeCheck,
@@ -220,24 +218,7 @@ const MyTicket = () => {
           ))}
         </div>
 
-        <div className="mt-12 sm:mt-16 flex flex-col items-center justify-center text-center gap-3 sm:gap-4 py-8 sm:py-12 border-t border-gray-200 px-4">
-          <div className="p-3 bg-blue-100 rounded-full text-blue-700">
-            <Headset size={24} className="sm:w-6.5 sm:h-6.5" />
-          </div>
-
-          <div>
-            <h3 className="text-base sm:text-lg font-bold">
-              Having trouble with your tickets?
-            </h3>
-            <p className="text-gray-500 mt-1 text-xs sm:text-sm max-w-md">
-              Visit the Help Desk near the Main Entrance or contact support.
-            </p>
-          </div>
-
-          <a className="text-blue-700 font-medium hover:underline flex items-center gap-1 text-sm sm:text-base cursor-pointer">
-            Contact Volunteer Support <ArrowRight size={16} />
-          </a>
-        </div>
+        
       </main>
 
       {/* QR Modal - Fullscreen on mobile */}

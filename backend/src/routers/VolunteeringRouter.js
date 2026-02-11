@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  assignVolunteer,
+  createAndAssignVolunteer,
   getAllVolunteers,
   getAssignedEvents,
 } from "../controllers/VolunteeringController.js";
@@ -11,7 +11,7 @@ const router = express.Router();
 router
   .route("/")
   .get(requireRole("ADMIN"), getAllVolunteers)
-  .post(requireRole("ADMIN"), assignVolunteer);
+  .post(requireRole("ADMIN"), createAndAssignVolunteer);
 
 router.route("/me").get(requireRole("VOLUNTEER"), getAssignedEvents);
 
