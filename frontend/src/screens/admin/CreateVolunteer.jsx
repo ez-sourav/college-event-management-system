@@ -15,6 +15,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { useAuthContext } from "../../../hooks/useAuthContext";
 
 const CreateVolunteer = () => {
   const formatEventTime = (start, end) => {
@@ -70,56 +71,36 @@ const CreateVolunteer = () => {
 
   const [events, setEvents] = useState([]);
 
+  const { auth } = useAuthContext();
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const auth = JSON.parse(localStorage.getItem("auth"));
-        const token = auth?.token;
+        // const token = localStorage.getItem("token");
 
-        if (!token) {
-          console.log("Token not found, login required!");
-          return;
-        }
+        // if (!token) {
+        //   console.log("Token not found, login required!");
+        //   return;
+        // }
 
         const res = await axios.get("http://localhost:8000/events", {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${auth.token}`,
           },
         });
 
-        const formattedEvents = res.data.events
-          .map((event) => {
-            const now = new Date();
-            const start = new Date(event.startTime);
-            const end = new Date(event.endTime);
-
-            let status = "";
-            let statusStyle = "";
-
-            if (now < start) {
-              status = "Upcoming";
-              statusStyle = "bg-yellow-100 text-yellow-800";
-            } else if (now >= start && now <= end) {
-              status = "Active";
-              statusStyle = "bg-green-100 text-green-800";
-            } else {
-              status = "Completed";
-              statusStyle = "bg-gray-200 text-gray-700";
-            }
-
-            return {
-              id: event._id,
-              title: event.name,
-              status,
-              statusStyle,
-              time: formatEventTime(start, end),
-              venue: event.venue,
-              selected: false,
-              disabled: status === "Completed",
-              endTime: event.endTime,
-            };
-          })
-          .filter((event) => event.status !== "Completed"); // remove completed events
+        const formattedEvents = res.data.events.map((event) => ({
+          id: event._id,
+          title: event.name,
+          status: "Active",
+          statusStyle: "bg-green-100 text-green-800",
+          time: `${new Date(event.startTime).toLocaleString()} - ${new Date(
+            event.endTime,
+          ).toLocaleString()}`,
+          venue: event.venue,
+          selected: false,
+          disabled: false,
+        }));
 
         setEvents(formattedEvents);
       } catch (error) {
@@ -233,14 +214,6 @@ const CreateVolunteer = () => {
     if (!isValid) return;
 
     try {
-      const auth = JSON.parse(localStorage.getItem("auth"));
-      const token = auth?.token;
-
-      if (!token) {
-        alert("Login required!");
-        return;
-      }
-
       const selectedEvents = events.filter((e) => e.selected);
 
       const payload = {
@@ -255,12 +228,31 @@ const CreateVolunteer = () => {
         payload,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${auth.token}`,
           },
         },
       );
 
       alert(res.data.message || "Volunteer created and assigned successfully!");
+
+      // RESET FORM
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        autoGenerate: false,
+      });
+
+      setSearchTerm("");
+      setErrors({ name: "", email: "", password: "", events: "" });
+
+      // UNSELECT ALL EVENTS
+      setEvents((prev) =>
+        prev.map((ev) => ({
+          ...ev,
+          selected: false,
+        })),
+      );
     } catch (error) {
       console.log(error);
       alert(error.response?.data?.message || "Something went wrong!");

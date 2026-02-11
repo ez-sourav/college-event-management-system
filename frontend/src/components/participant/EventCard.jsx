@@ -1,52 +1,74 @@
-import React from 'react'
-import { FaCalendarWeek, FaMapPin } from 'react-icons/fa'
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { FaCalendarAlt, FaMapMarkerAlt, FaUsers } from "react-icons/fa";
 
-const EventCard = () => {
+const EventCard = ({ event }) => {
+  const navigate = useNavigate();
+
+  const formattedDate = new Date(event.startTime).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
   return (
-    <div className=' rounded-2xl overflow-hidden w-80 shadow-md'>
-      
-      <div className='relative'>
-        
-        <div className='absolute top-3 left-0 w-full flex justify-between px-3'>
-          <span className='bg-blue-50 rounded-2xl px-3 py-1 font-semibold text-blue-800 uppercase text-xs'>
-            Event Type
-          </span>
-          <span className='bg-red-50 rounded-2xl px-3 py-1 font-semibold text-red-800 uppercase text-xs'>
-            Open
-          </span>
-        </div>
-
+    <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden flex flex-col">
+      {/* Banner Image */}
+      <div className="h-40">
         <img
-          className='rounded-t-2xl w-full h-48 object-cover'
-          src="https://images.unsplash.com/photo-1761839259494-71caddcdd6b3?w=600"
-          alt="event"
+          src={
+            event.bannerImageUrl ||
+            "https://images.unsplash.com/photo-1505373877841-8d25f7d46678"
+          }
+          alt={event.name}
+          className="w-full h-full object-cover"
         />
       </div>
 
-      <div className='p-3'>
-        
-        <h3 className='font-bold text-lg'>Event Name</h3>
+      {/* Content */}
+      <div className="p-4 flex flex-col flex-1 gap-3">
+        <h3 className="text-lg font-bold text-gray-800">{event.name}</h3>
 
-        <div className='mt-2 text-sm text-gray-600 space-y-1'>
-          <p className='flex items-center gap-2'>
-            <FaCalendarWeek className='text-blue-800' />
-            Event date, time
-          </p>
-          <p className='flex items-center gap-2'>
-            <FaMapPin className='text-blue-800' />
-            Location
-          </p>
+        <p className="text-sm text-gray-500 line-clamp-2">
+          {event.description}
+        </p>
+
+        {/* Event Info */}
+        <div className="text-sm text-gray-600 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <FaCalendarAlt className="text-blue-600" />
+            <span>{formattedDate}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <FaMapMarkerAlt className="text-blue-600" />
+            <span>{event.venue}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <FaUsers className="text-blue-600" />
+            <span>
+              Team: {event.teamSize?.min} - {event.teamSize?.max}
+            </span>
+          </div>
         </div>
 
-        <div className='flex justify-end mt-4'>
-          <button className='text-white bg-blue-800 px-4 py-2 rounded-lg hover:bg-blue-900 transition cursor-pointer'>
+        {/* Bottom Section */}
+        <div className="mt-auto flex justify-between items-center pt-3">
+          <span className="font-semibold text-blue-700">
+            {event.entryFee === 0 ? "Free" : `₹${event.entryFee}`}
+          </span>
+
+          <button
+            onClick={() => navigate(`/events/${event._id}`)}
+            className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm transition"
+          >
             Register
           </button>
         </div>
-
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default EventCard
+export default EventCard;

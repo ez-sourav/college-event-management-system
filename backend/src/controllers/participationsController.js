@@ -29,7 +29,9 @@ export async function getAllTickets(req, res) {
     res.status(401).json({ message: "User is not authenticated" });
   }
 
-  const participations = await Participation.find({ userId });
+  const participations = await Participation.find({ userId }).populate({
+    path: "eventId",
+  });
 
   res.status(200).json({ tickets: participations });
 }
