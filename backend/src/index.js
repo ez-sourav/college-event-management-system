@@ -25,6 +25,11 @@ app.use(
   }),
 );
 
+app.use((req, res, next) => {
+  console.log(req.body);
+  next();
+});
+
 app.use("/auth", authRouter);
 app.use("/uploads", requireAuth, uploadsRouter);
 app.use("/events", requireAuth, eventRouter);

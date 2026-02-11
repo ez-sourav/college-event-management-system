@@ -8,8 +8,8 @@ import { requireRole } from "../middlewares/requireRole.js";
 
 const router = express.Router();
 
-router.route("/").post(requireRole("PARTICIPANT"), registerForEvent);
-router.route("/me").get(requireRole("PARTICIPANT"), getAllTickets);
+router.route("/").post(requireRole("STUDENT"), registerForEvent);
+router.route("/me").get(requireRole("STUDENT"), getAllTickets);
 router
   .route("/:participationId/checkIn")
   .post(requireRole("VOLUNTEER"), checkInParticipant);
