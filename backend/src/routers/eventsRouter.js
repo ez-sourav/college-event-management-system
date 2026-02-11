@@ -5,7 +5,7 @@ import {
   getAllEvents,
   getEventAnalytics,
   getEventDetails,
-  getEventParticipants,
+  getEventParticipations,
   getEventVolunteers,
   updateEvent,
 } from "../controllers/eventsController.js";
@@ -21,7 +21,7 @@ router
   .delete(requireRole("ADMIN"), deleteEvent);
 router
   .route("/:eventId/participants")
-  .get(requireRole("ADMIN"), getEventParticipants);
+  .get(requireRole("ADMIN"), getEventParticipations);
 router
   .route("/:eventId/analytics")
   .get(requireRole("ADMIN"), getEventAnalytics);
