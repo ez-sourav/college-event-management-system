@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 const AdminDashboard = () => {
+  const baseURL = import.meta.env.VITE_API_URL;
   const [searchQuery, setSearchQuery] = useState("");
 
   // ================== REAL DATA STATES ==================
@@ -50,7 +51,7 @@ const AdminDashboard = () => {
 
       if (!confirmDelete) return;
 
-      await axios.delete(`http://localhost:8000/events/${eventId}`, {
+      await axios.delete(`${baseURL}/events/${eventId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -79,7 +80,7 @@ const AdminDashboard = () => {
 
         // Fetch Dashboard Stats
         const statsRes = await axios.get(
-          "http://localhost:8000/admin/dashboard",
+          `${baseURL}/admin/dashboard`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -90,7 +91,7 @@ const AdminDashboard = () => {
         setStatsData(statsRes.data);
 
         // Fetch Events List
-        const eventsRes = await axios.get("http://localhost:8000/events", {
+        const eventsRes = await axios.get(`${baseURL}/events`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

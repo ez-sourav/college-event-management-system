@@ -5,6 +5,7 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 import { useAuthContext } from "../../../hooks/useAuthContext";
 
 const QrScanner = () => {
+  const baseURL = import.meta.env.VITE_API_URL;
   const { eventId } = useParams();
   const { auth } = useAuthContext();
 
@@ -29,7 +30,7 @@ const QrScanner = () => {
       }
 
       const res = await axios.post(
-        `http://localhost:8000/participations/${participationId}/checkin`,
+        `${baseURL}/participations/${participationId}/checkin`,
         { eventId },
         {
           headers: {

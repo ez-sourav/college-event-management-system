@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 export default function EventDetails() {
+  const baseURL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +26,7 @@ export default function EventDetails() {
     setIsRegistering(true);
 
     try {
-      const res = await fetch(`http://localhost:8000/participations`, {
+      const res = await fetch(`${baseURL}/participations`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,7 +62,7 @@ export default function EventDetails() {
 
     const fetchEventDetails = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/events/${eventId}`, {
+        const res = await fetch(`${baseURL}/events/${eventId}`, {
           headers: {
             Authorization: `Bearer ${auth.token}`,
           },

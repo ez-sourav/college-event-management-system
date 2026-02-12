@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 //auth
-import Login from "./screens/auth/Login";
-import Signup from "./screens/auth/Signup";
+import Login from "./screens/Auth/Login";
+import Signup from "./screens/Auth/Signup";
 //admin
 import AdminDashboard from "./screens/admin/AdminDashboard";
 import CreateVolunteer from "./screens/admin/CreateVolunteer";
