@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuthContext } from "../../../hooks/useAuthContext";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
+import PageNotFound from "../PageNotFound";
 
 export default function EventDetails() {
   const [event, setEvent] = useState(null);
@@ -38,30 +39,31 @@ export default function EventDetails() {
     }
   }
 
- useEffect(() => {
-  if (!auth?.token) return;
+  useEffect(() => {
+    if (!auth?.token) return;
 
-  const fetchEventDetails = async () => {
-    try {
-      const res = await fetch(`http://localhost:8000/events/${eventId}`, {
-        headers: {
-          Authorization: `Bearer ${auth.token}`,
-        },
-      });
+    const fetchEventDetails = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/events/${eventId}`, {
+          headers: {
+            Authorization: `Bearer ${auth.token}`,
+          },
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      setEvent({ ...data.event, hasRegistered: data.hasRegistered });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        // console.log(data);
 
-  fetchEventDetails();
-}, [eventId, auth?.token]);
+        setEvent(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchEventDetails();
+  }, [eventId, auth?.token]);
 
   console.log(event);
 
@@ -75,6 +77,18 @@ export default function EventDetails() {
       month: "short",
       year: "numeric",
     });
+
+  const now = new Date();
+  const deadline = new Date(event.registrationDeadline);
+
+  // difference in milliseconds
+  const diffInMs = deadline - now;
+
+  // convert to days
+  const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+  // show warning only if within last 2 days and not expired
+  const isClosingSoon = diffInDays <= 2 && diffInDays > 0;
 
   return (
     <div className="bg-linear-to-b from-slate-100 to-slate-200 min-h-screen pb-28">
@@ -196,22 +210,59 @@ export default function EventDetails() {
               </ul>
             </div>
           </div>
+
+          {/* RIGHT SIDEBAR */}
+          <div className="space-y-8">
+            {/* Venue Card */}
+            <div className="bg-white rounded-2xl p-6 shadow-md">
+              <h3 className="text-lg font-bold text-slate-800 mb-3">
+                📍 Venue
+              </h3>
+              <p className="text-slate-600">{event.venue}</p>
+            </div>
+
+            {/* Coordinator Card */}
+            <div className="bg-white rounded-2xl p-6 shadow-md">
+              <h3 className="text-lg font-bold text-slate-800 mb-3">
+                👤 Event Coordinator
+              </h3>
+
+              <p className="text-slate-700 font-medium">
+                {event.createdBy?.name || "Admin"}
+              </p>
+
+              {event.createdBy?.email && (
+                <p className="text-sm text-slate-500 mt-1">
+                  {event.createdBy.email}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Sticky Register Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.15)] px-6 py-4 flex justify-between items-center">
         <div>
-          <p className="text-red-500 text-sm font-semibold">
-            Registration closes soon!
-          </p>
+          {isClosingSoon && (
+            <p className="text-red-500 text-sm font-semibold">
+              Registration closes soon!
+            </p>
+          )}
+
           <p className="text-slate-500 text-sm">Entry Fee: ₹{event.entryFee}</p>
         </div>
 
         <button
           disabled={event.hasRegistered}
-          className="bg-linear-to-r cursor-pointer from-blue-600 to-indigo-600 hover:opacity-90 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition"
           onClick={handleRegistration}
+          className={`px-8 py-3 rounded-xl font-semibold shadow-lg transition
+    ${
+      event.hasRegistered
+        ? "bg-gray-300 text-gray-600 cursor-not-allowed shadow-none"
+        : "bg-linear-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white cursor-pointer"
+    }
+  `}
         >
           {event.hasRegistered
             ? "Already registered!"

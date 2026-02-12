@@ -56,7 +56,7 @@ const EventListings = () => {
               className="absolute right-2 top-1/2 -translate-y-1/2 
               bg-blue-700 hover:bg-blue-800 
               text-white px-5 py-2 rounded-full 
-              transition duration-200 shadow-md"
+              transition duration-200 shadow-md cursor-pointer"
             >
               Search
             </button>
