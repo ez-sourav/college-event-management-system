@@ -29,6 +29,7 @@ export default function EventDetails() {
 
       if (data.success) {
         toast("Successfully registered");
+        <Navigate to={"/my-ticket"} replace />;
       } else {
         alert(data.message || "Registration failed");
       }
