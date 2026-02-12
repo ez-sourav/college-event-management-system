@@ -81,7 +81,7 @@ export async function deleteEvent(req, res) {
 // GET /events/:eventId/participants
 // GET /events/:eventId/analytics
 // GET /events/:eventId/volunteers
-
+ 
 export async function getEventParticipations(req, res) {
   try {
     const eventId = req.params.eventId;
