@@ -81,7 +81,7 @@ export async function deleteEvent(req, res) {
 // GET /events/:eventId/participants
 // GET /events/:eventId/analytics
 // GET /events/:eventId/volunteers
- 
+
 export async function getEventParticipations(req, res) {
   try {
     const eventId = req.params.eventId;
@@ -122,7 +122,10 @@ export async function getEventDetails(req, res) {
     const eventId = req.params.eventId;
     const userId = req.user.id;
 
-    const event = await Event.findById(eventId);
+    const event = await Event.findById(eventId).populate(
+      "createdBy",
+      "name email",
+    );
 
     if (!event) {
       return res.status(404).json({ message: "Event with this id not found" });

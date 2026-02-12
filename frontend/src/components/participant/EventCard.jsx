@@ -61,7 +61,7 @@ const EventCard = ({ event }) => {
 
           <button
             onClick={() => navigate(`/events/${event._id}`)}
-            className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm transition"
+            className="bg-blue-700 cursor-pointer hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm transition"
           >
             Register
           </button>

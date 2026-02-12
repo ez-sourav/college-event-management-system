@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuthContext } from "../../../hooks/useAuthContext";
-import { useParams } from "react-router-dom";
+
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -12,6 +12,9 @@ import {
   AlertTriangle,
   CheckCircle2,
 } from "lucide-react";
+import { Navigate, useParams } from "react-router-dom";
+import PageNotFound from "../PageNotFound";
+import toast from "react-hot-toast";
 
 export default function EventDetails() {
   const navigate = useNavigate();
@@ -110,6 +113,18 @@ export default function EventDetails() {
       month: "short",
       year: "numeric",
     });
+
+  const now = new Date();
+  const deadline = new Date(event.registrationDeadline);
+
+  // difference in milliseconds
+  const diffInMs = deadline - now;
+
+  // convert to days
+  const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+  // show warning only if within last 2 days and not expired
+  const isClosingSoon = diffInDays <= 2 && diffInDays > 0;
 
   return (
     <div className="bg-gray-200 min-h-screen pb-28">
@@ -296,6 +311,30 @@ export default function EventDetails() {
                     ? "Registering..."
                     : "Register Now"}
               </button>
+          <div className="space-y-8">
+            {/* Venue Card */}
+            <div className="bg-white rounded-2xl p-6 shadow-md">
+              <h3 className="text-lg font-bold text-slate-800 mb-3">
+                📍 Venue
+              </h3>
+              <p className="text-slate-600">{event.venue}</p>
+            </div>
+
+            {/* Coordinator Card */}
+            <div className="bg-white rounded-2xl p-6 shadow-md">
+              <h3 className="text-lg font-bold text-slate-800 mb-3">
+                👤 Event Coordinator
+              </h3>
+
+              <p className="text-slate-700 font-medium">
+                {event.createdBy?.name || "Admin"}
+              </p>
+
+              {event.createdBy?.email && (
+                <p className="text-sm text-slate-500 mt-1">
+                  {event.createdBy.email}
+                </p>
+              )}
             </div>
           </div>
         </div>

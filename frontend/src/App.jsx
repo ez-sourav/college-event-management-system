@@ -19,10 +19,12 @@ import GuestRoute from "./components/auth/GuestRoute";
 import RootRedirect from "./components/auth/RootRedirect";
 import Navbar from "./components/UI/Navbar";
 import QrScanner from "./screens/volunteer/QrScanner";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   return (
     <>
+      <Toaster position="top-center" />
       <Navbar />
       <Routes>
         <Route path="/" element={<RootRedirect />} />
