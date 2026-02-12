@@ -7,6 +7,7 @@ import { Download } from "lucide-react";
 import { useAuthContext } from "../../../hooks/useAuthContext";
 
 const MyTicket = () => {
+  const baseURL = import.meta.env.VITE_API_URL;
   const { auth } = useAuthContext();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +15,7 @@ const MyTicket = () => {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/participations/me", {
+        const res = await axios.get(`${baseURL}/participations/me`, {
           headers: {
             Authorization: `Bearer ${auth.token}`,
           },

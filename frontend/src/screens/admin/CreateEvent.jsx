@@ -18,10 +18,15 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const UPLOAD_API_URL = "http://localhost:8000/uploads/banner";
-const CREATE_EVENT_API_URL = "http://localhost:8000/events";
 
 const CreateEvent = () => {
+
+  const baseURL = import.meta.env.VITE_API_URL;
+
+
+  const UPLOAD_API_URL = `${baseURL}/uploads/banner`;
+  const CREATE_EVENT_API_URL = `${baseURL}/events`;
+
   const fileInputRef = useRef(null);
 
   const [uploading, setUploading] = useState(false);

@@ -5,6 +5,7 @@ import EventCard from "../../components/volunteer/EventCard";
 import { useAuthContext } from "../../../hooks/useAuthContext";
 
 const AssignedEvents = () => {
+  const baseURL = import.meta.env.VITE_API_URL;
   const { auth } = useAuthContext();
 
   const [search, setSearch] = useState("");
@@ -16,7 +17,7 @@ const AssignedEvents = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/volunteering/me", {
+        const res = await axios.get(`${baseURL}/volunteering/me`, {
           headers: {
             Authorization: `Bearer ${auth.token}`,
           },

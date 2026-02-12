@@ -18,6 +18,7 @@ import {
 import { useAuthContext } from "../../../hooks/useAuthContext";
 
 const CreateVolunteer = () => {
+  const baseURL = import.meta.env.VITE_API_URL;
   const formatEventTime = (start, end) => {
     const startDate = start.toLocaleDateString("en-IN", {
       day: "2-digit",
@@ -83,7 +84,7 @@ const CreateVolunteer = () => {
         //   return;
         // }
 
-        const res = await axios.get("http://localhost:8000/events", {
+        const res = await axios.get(`${baseURL}/events`, {
           headers: {
             Authorization: `Bearer ${auth.token}`,
           },
@@ -109,7 +110,7 @@ const CreateVolunteer = () => {
     };
 
     fetchEvents();
-  }, []);
+  }, [auth?.token]);
 
   const generatePassword = (length = 10) => {
     const chars =
@@ -224,7 +225,7 @@ const CreateVolunteer = () => {
       };
 
       const res = await axios.post(
-        "http://localhost:8000/volunteering",
+        `${baseURL}/volunteering`,
         payload,
         {
           headers: {

@@ -4,6 +4,7 @@ import EventCard from "../../components/participant/EventCard";
 import { useAuthContext } from "../../../hooks/useAuthContext";
 
 const EventListings = () => {
+  const baseURL = import.meta.env.VITE_API_URL;
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -17,7 +18,7 @@ const EventListings = () => {
       try {
         setLoading(true);
 
-        const res = await fetch("http://localhost:8000/events", {
+        const res = await fetch(`${baseURL}/events`, {
           headers: {
             Authorization: `Bearer ${auth?.token}`,
           },
