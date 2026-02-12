@@ -63,7 +63,7 @@ const EventListings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-10">
         {/* Header */}
         <div className="text-center space-y-3">
