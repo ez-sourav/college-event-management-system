@@ -38,26 +38,30 @@ export default function EventDetails() {
     }
   }
 
-  useEffect(() => {
-    const fetchEventDetails = async () => {
-      try {
-        const res = await fetch(`http://localhost:8000/events/${eventId}`, {
-          headers: {
-            Authorization: `Bearer ${auth.token}`,
-          },
-        });
-        const data = await res.json();
-        console.log(data);
-        setEvent(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+ useEffect(() => {
+  if (!auth?.token) return;
 
-    fetchEventDetails();
-  }, []);
+  const fetchEventDetails = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/events/${eventId}`, {
+        headers: {
+          Authorization: `Bearer ${auth.token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      setEvent({ ...data.event, hasRegistered: data.hasRegistered });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchEventDetails();
+}, [eventId, auth?.token]);
+
 
   console.log(event);
 

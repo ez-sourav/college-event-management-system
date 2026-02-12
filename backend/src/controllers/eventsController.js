@@ -81,7 +81,7 @@ export async function deleteEvent(req, res) {
 // GET /events/:eventId/participants
 // GET /events/:eventId/analytics
 // GET /events/:eventId/volunteers
-
+ 
 export async function getEventParticipations(req, res) {
   try {
     const eventId = req.params.eventId;
@@ -118,13 +118,9 @@ export async function getEventVolunteers(req, res) {
 
 // GET /events/:eventId
 export async function getEventDetails(req, res) {
-<<<<<<< HEAD
-  const eventId = req.params.eventId;
-  const userId = req.user.id;
-=======
   try {
     const eventId = req.params.eventId;
->>>>>>> bbf0a1acf622163cdd6763b563ed7f60899ffa9a
+    const userId = req.user.id;
 
     const event = await Event.findById(eventId);
 
@@ -132,16 +128,11 @@ export async function getEventDetails(req, res) {
       return res.status(404).json({ message: "Event with this id not found" });
     }
 
-    res.status(200).json({ event });
+    const hasRegistered = !!(await Participation.findOne({ eventId, userId }));
+
+    res.status(200).json({ event: event.toObject(), hasRegistered });
   } catch (error) {
     console.log("Get Event Details Error:", error);
     res.status(500).json({ message: "Failed to fetch event details" });
   }
-<<<<<<< HEAD
-
-  const hasRegistered = !!(await Participation.findOne({ eventId, userId }));
-
-  res.status(200).json({ ...event.toObject(), hasRegistered });
-=======
->>>>>>> bbf0a1acf622163cdd6763b563ed7f60899ffa9a
 }
