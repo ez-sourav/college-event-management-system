@@ -55,31 +55,39 @@ export function getAllVolunteers(req, res) {}
 
 // GET /volunteering/me (assigned events)
 export async function getAssignedEvents(req, res) {
-  const userId = req.user?.id;
+  try {
+    const userId = req.user?.id;
 
-  if (!userId) {
-    res.status(401).json({ message: "User is not authenticated" });
+    if (!userId) {
+      return res.status(401).json({ message: "User is not authenticated" });
+    }
+
+    const assignments = await Volunteering.find({ userId }).populate("eventId");
+
+    // remove assignments where event is deleted / null
+    const validAssignments = assignments.filter((a) => a.eventId);
+
+    const eventsWithStats = await Promise.all(
+      validAssignments.map(async (assignment) => {
+        const event = assignment.eventId;
+
+        const totalCheckedIn = await Participation.countDocuments({
+          eventId: event._id,
+          checkedIn: true,
+        });
+
+        return {
+          ...event.toObject(),
+          totalCheckedIn,
+        };
+      }),
+    );
+
+    return res.status(200).json({
+      assignedEvents: eventsWithStats,
+    });
+  } catch (error) {
+    console.log("Get Assigned Events Error:", error);
+    return res.status(500).json({ message: "Server error" });
   }
-
-  const assignments = await Volunteering.find({ userId }).populate("eventId");
-
-  const eventsWithStats = await Promise.all(
-    assignments.map(async (assignment) => {
-      const event = assignment.eventId;
-
-      const totalCheckedIn = await Participation.countDocuments({
-        eventId: event._id,
-        checkedIn: true,
-      });
-
-      return {
-        ...event.toObject(),
-        totalCheckedIn,
-      };
-    }),
-  );
-
-  res.status(200).json({
-    assignedEvents: eventsWithStats,
-  });
 }

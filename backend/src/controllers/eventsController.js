@@ -50,7 +50,7 @@ export async function createEvent(req, res) {
     res.status(201).json({ success: true, event });
   } catch (error) {
     console.log("Create Event Error:", error);
-    res.status(500).json({ message: "Failed to create event" });
+    res.status(500).json({ message: "Failed to create event" + error.message });
   }
 }
 

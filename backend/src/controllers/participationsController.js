@@ -33,7 +33,10 @@ export async function getAllTickets(req, res) {
     path: "eventId",
   });
 
-  res.status(200).json({ tickets: participations });
+  // remove assignments where event is deleted / null
+  const validParticipations = participations.filter((a) => a.eventId);
+
+  res.status(200).json({ tickets: validParticipations });
 }
 
 // POST /participations/:participationId/checkin

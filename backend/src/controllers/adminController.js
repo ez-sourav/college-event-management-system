@@ -3,15 +3,64 @@ import Volunteering from "../models/Volunteering.js";
 
 export const getDashboardStats = async (req, res) => {
   try {
-    const totalRegistrations = await Participation.countDocuments();
+    // ✅ Total Registrations (only existing events)
+    const registrationsData = await Participation.aggregate([
+      {
+        $lookup: {
+          from: "events",
+          localField: "eventId",
+          foreignField: "_id",
+          as: "event",
+        },
+      },
+      { $unwind: "$event" }, // removes deleted event participations
+      { $count: "total" },
+    ]);
 
-    const liveAttendance = await Participation.countDocuments({
-      checkedIn: true,
-    });
+    const totalRegistrations =
+      registrationsData.length > 0 ? registrationsData[0].total : 0;
 
-    const volunteersActive = await Volunteering.countDocuments();
+    // ✅ Live Attendance (only existing events)
+    const attendanceData = await Participation.aggregate([
+      { $match: { checkedIn: true } },
+      {
+        $lookup: {
+          from: "events",
+          localField: "eventId",
+          foreignField: "_id",
+          as: "event",
+        },
+      },
+      { $unwind: "$event" },
+      { $count: "total" },
+    ]);
 
-    // ✅ Revenue = entryFee * participation count (per event)
+    const liveAttendance =
+      attendanceData.length > 0 ? attendanceData[0].total : 0;
+
+    // ✅ Active Volunteers (only existing users)
+    const volunteersData = await Volunteering.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" }, // removes deleted users
+      {
+        $group: {
+          _id: "$userId",
+        },
+      },
+      { $count: "total" },
+    ]);
+
+    const volunteersActive =
+      volunteersData.length > 0 ? volunteersData[0].total : 0;
+
+    // ✅ Revenue = entryFee * participants count (only existing events)
     const revenueData = await Participation.aggregate([
       {
         $group: {
@@ -27,7 +76,7 @@ export const getDashboardStats = async (req, res) => {
           as: "event",
         },
       },
-      { $unwind: "$event" },
+      { $unwind: "$event" }, // removes deleted events
       {
         $project: {
           totalRevenue: {
@@ -46,7 +95,8 @@ export const getDashboardStats = async (req, res) => {
     const revenueCollected =
       revenueData.length > 0 ? revenueData[0].revenueCollected : 0;
 
-    res.status(200).json({
+    // ✅ Final Response
+    return res.status(200).json({
       totalRegistrations,
       liveAttendance,
       volunteersActive,
@@ -54,6 +104,6 @@ export const getDashboardStats = async (req, res) => {
     });
   } catch (error) {
     console.log("Dashboard Stats Error:", error);
-    res.status(500).json({ message: "Failed to fetch dashboard stats" });
+    return res.status(500).json({ message: "Failed to fetch dashboard stats" });
   }
 };
