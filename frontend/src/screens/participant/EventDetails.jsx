@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuthContext } from "../../../hooks/useAuthContext";
 import { Navigate, useParams } from "react-router-dom";
 import PageNotFound from "../PageNotFound";
+import toast from "react-hot-toast";
 
 export default function EventDetails() {
   const [event, setEvent] = useState(null);
@@ -27,7 +28,7 @@ export default function EventDetails() {
       const data = await res.json();
 
       if (data.success) {
-        alert("Successfully registered");
+        toast("Successfully registered");
       } else {
         alert(data.message || "Registration failed");
       }
@@ -52,8 +53,6 @@ export default function EventDetails() {
 
         const data = await res.json();
 
-        // console.log(data);
-
         setEvent(data);
       } catch (error) {
         console.error(error);
@@ -64,8 +63,6 @@ export default function EventDetails() {
 
     fetchEventDetails();
   }, [eventId, auth?.token]);
-
-  console.log(event);
 
   if (loading) return <p>Loading...</p>;
 
