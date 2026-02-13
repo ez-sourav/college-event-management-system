@@ -6,6 +6,13 @@ Designed to replace Google Form registrations and manual check-ins with a secure
 
 ---
 
+## 🌐 Live Demo
+
+**Live**: https://event-management-in.vercel.app
+
+
+---
+
 ## 🚀 Features
 
 ### 👥 Role-Based Access
