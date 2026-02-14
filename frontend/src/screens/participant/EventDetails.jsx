@@ -22,41 +22,6 @@ export default function EventDetails() {
 
   const { id: eventId } = useParams();
 
-  async function handleRegistration() {
-    setIsRegistering(true);
-
-    try {
-      const res = await fetch(`${baseURL}/participations`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.token}`,
-        },
-        body: JSON.stringify({ eventId }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        alert("Successfully registered");
-
-        setEvent((prev) => ({
-          ...prev,
-          hasRegistered: true,
-        }));
-
-        return;
-      } else {
-        alert(data.message || "Registration failed");
-      }
-    } catch (error) {
-      alert("Couldn't register to event!");
-      console.log(error.message);
-    } finally {
-      setIsRegistering(false);
-    }
-  }
-
   useEffect(() => {
     if (!auth?.token) return;
 
@@ -98,7 +63,6 @@ export default function EventDetails() {
       </div>
     );
 
-  // ✅ Fix: prevent crash when event is null
   if (!event) {
     return (
       <div className="min-h-screen bg-gray-200 flex items-center justify-center px-4">
@@ -112,10 +76,7 @@ export default function EventDetails() {
     );
   }
 
-  const totalPrize = event.prizes?.reduce(
-    (acc, prize) => acc + prize.amount,
-    0
-  );
+  const totalPrize = event.prizes?.reduce((acc, prize) => acc + prize.amount, 0);
 
   const formatDate = (date) =>
     new Date(date).toLocaleDateString("en-IN", {
@@ -127,14 +88,59 @@ export default function EventDetails() {
   const now = new Date();
   const deadline = new Date(event.registrationDeadline);
 
-  // difference in milliseconds
   const diffInMs = deadline - now;
-
-  // convert to days
   const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
 
-  // show warning only if within last 2 days and not expired
   const isClosingSoon = diffInDays <= 2 && diffInDays > 0;
+
+  // ✅ NEW: event closed logic
+  const isExpired = event.isExpired || new Date(event.endTime) < new Date();
+  const isRegistrationClosed =
+    event.isRegistrationClosed ||
+    new Date(event.registrationDeadline) < new Date();
+
+  const isClosed = isExpired || isRegistrationClosed;
+
+  async function handleRegistration() {
+    // ✅ prevent registration if closed
+    if (isClosed) {
+      alert("Registration is closed!");
+      return;
+    }
+
+    setIsRegistering(true);
+
+    try {
+      const res = await fetch(`${baseURL}/participations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.token}`,
+        },
+        body: JSON.stringify({ eventId }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Successfully registered");
+
+        setEvent((prev) => ({
+          ...prev,
+          hasRegistered: true,
+        }));
+
+        return;
+      } else {
+        alert(data.message || "Registration failed");
+      }
+    } catch (error) {
+      alert("Couldn't register to event!");
+      console.log(error.message);
+    } finally {
+      setIsRegistering(false);
+    }
+  }
 
   return (
     <div className="bg-gray-200 min-h-screen pb-28">
@@ -202,6 +208,12 @@ export default function EventDetails() {
                 {event.hasRegistered && (
                   <div className="mt-5 bg-emerald-500/20 border border-emerald-300/30 text-emerald-200 text-xs sm:text-sm font-bold px-4 py-2 rounded-xl">
                     ✅ Already Registered
+                  </div>
+                )}
+
+                {isClosed && !event.hasRegistered && (
+                  <div className="mt-5 bg-gray-500/20 border border-gray-300/30 text-gray-200 text-xs sm:text-sm font-bold px-4 py-2 rounded-xl">
+                    ❌ Registration Closed
                   </div>
                 )}
               </div>
@@ -285,7 +297,9 @@ export default function EventDetails() {
               <div className="space-y-3 text-sm text-gray-700">
                 <div className="flex justify-between">
                   <span className="font-semibold text-gray-500">Start Date</span>
-                  <span className="font-bold">{formatDate(event.startTime)}</span>
+                  <span className="font-bold">
+                    {formatDate(event.startTime)}
+                  </span>
                 </div>
 
                 <div className="flex justify-between">
@@ -306,23 +320,38 @@ export default function EventDetails() {
                 </div>
               </div>
 
+              {/* DESKTOP REGISTER BUTTON */}
               <button
-                disabled={event.hasRegistered || isRegistering}
+                disabled={event.hasRegistered || isRegistering || isClosed}
                 className={`mt-8 w-full h-12 rounded-xl font-bold text-sm shadow-md transition flex items-center justify-center
                   ${
                     event.hasRegistered
                       ? "bg-green-200 text-green-900 cursor-not-allowed"
-                      : "bg-[#1121d4] hover:bg-[#1121d4]/90 text-white"
+                      : isClosed
+                        ? "bg-gray-200 text-gray-600 cursor-not-allowed"
+                        : "bg-[#1121d4] hover:bg-[#1121d4]/90 text-white"
                   }
                 `}
                 onClick={handleRegistration}
               >
                 {event.hasRegistered
                   ? "Already Registered"
-                  : isRegistering
-                    ? "Registering..."
-                    : "Register Now"}
+                  : isClosed
+                    ? "Registration Closed"
+                    : isRegistering
+                      ? "Registering..."
+                      : "Register Now"}
               </button>
+
+              {/* CLOSED WARNING */}
+              {isClosed && !event.hasRegistered && (
+                <div className="mt-5 bg-gray-50 border border-gray-200 rounded-2xl p-4">
+                  <p className="text-gray-700 font-bold text-sm flex items-center gap-2">
+                    <AlertTriangle size={16} />
+                    This event is no longer accepting registrations.
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-8 mt-6">
                 {/* Venue Card */}
@@ -350,7 +379,7 @@ export default function EventDetails() {
                   )}
                 </div>
 
-                {isClosingSoon && (
+                {isClosingSoon && !isClosed && (
                   <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
                     <p className="text-red-600 font-bold flex items-center gap-2 text-sm">
                       <AlertTriangle size={16} />
@@ -368,7 +397,7 @@ export default function EventDetails() {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 px-4 py-3 shadow-xl z-50">
         <div className="flex items-center justify-between gap-4">
           <div>
-            {isClosingSoon && (
+            {isClosingSoon && !isClosed && (
               <p className="text-red-500 text-xs font-bold flex items-center gap-1">
                 <AlertTriangle size={14} />
                 Registration closing soon
@@ -381,21 +410,25 @@ export default function EventDetails() {
           </div>
 
           <button
-            disabled={event.hasRegistered || isRegistering}
+            disabled={event.hasRegistered || isRegistering || isClosed}
             onClick={handleRegistration}
             className={`px-5 py-2 rounded-xl font-bold text-xs shadow-md transition
               ${
                 event.hasRegistered
                   ? "bg-green-200 text-green-900 cursor-not-allowed"
-                  : "bg-[#1121d4] hover:bg-[#1121d4]/90 text-white"
+                  : isClosed
+                    ? "bg-gray-200 text-gray-600 cursor-not-allowed"
+                    : "bg-[#1121d4] hover:bg-[#1121d4]/90 text-white"
               }
             `}
           >
             {event.hasRegistered
               ? "Registered"
-              : isRegistering
-                ? "..."
-                : "Register"}
+              : isClosed
+                ? "Closed"
+                : isRegistering
+                  ? "..."
+                  : "Register"}
           </button>
         </div>
       </div>

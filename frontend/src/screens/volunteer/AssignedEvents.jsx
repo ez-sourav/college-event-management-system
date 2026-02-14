@@ -13,7 +13,7 @@ const AssignedEvents = () => {
   const [assignedEvents, setAssignedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch Assigned Events
+  //  Fetch Assigned Events
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -40,32 +40,23 @@ const AssignedEvents = () => {
 
   console.log(assignedEvents);
 
-  // ✅ Derived Filtered Events
+  //  Derived Filtered Events
   const filteredEvents = useMemo(() => {
-    return assignedEvents.filter((event) => {
-      const now = new Date();
-      const start = new Date(event.startTime);
-      const end = new Date(event.endTime);
+  return assignedEvents.filter((event) => {
+    const matchesSearch =
+      event.name.toLowerCase().includes(search.toLowerCase()) ||
+      event.venue.toLowerCase().includes(search.toLowerCase());
 
-      const isLive = now >= start && now <= end;
-      const isUpcoming = now < start;
-      const isCompleted = now > end;
+    if (!matchesSearch) return false;
 
-      // 🔎 Search match (name + venue)
-      const matchesSearch =
-        event.name.toLowerCase().includes(search.toLowerCase()) ||
-        event.venue.toLowerCase().includes(search.toLowerCase());
+    if (filter === "live") return event.status === "LIVE";
+    if (filter === "upcoming") return event.status === "UPCOMING";
+    if (filter === "completed") return event.status === "COMPLETED";
 
-      if (!matchesSearch) return false;
+    return true;
+  });
+}, [assignedEvents, search, filter]);
 
-      // 🎯 Filter logic
-      if (filter === "live") return isLive;
-      if (filter === "upcoming") return isUpcoming;
-      if (filter === "completed") return isCompleted;
-
-      return true; // all
-    });
-  }, [assignedEvents, search, filter]);
 
   if (loading) {
     return (
@@ -91,7 +82,7 @@ const AssignedEvents = () => {
 
         {/* Search + Filters */}
         <div className="mt-4 bg-white border border-gray-200 rounded-2xl px-4 py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 shadow-sm">
-          {/* 🔎 Search */}
+          {/*  Search */}
           <div className="flex items-center gap-3 w-full lg:max-w-md bg-gray-50 px-3 py-2 rounded-xl border border-gray-200">
             <Search className="text-gray-400" size={18} />
             <input
@@ -103,7 +94,7 @@ const AssignedEvents = () => {
             />
           </div>
 
-          {/* 🎯 Filters */}
+          {/*  Filters */}
           <div className="grid grid-cols-4 gap-2 sm:flex sm:w-auto sm:gap-3">
             {["all", "live", "upcoming", "completed"].map((type) => (
               <button

@@ -6,9 +6,31 @@ const EventCard = ({ event }) => {
   const navigate = useNavigate();
 
   const startDate = new Date(event.startTime);
-  const endDate = new Date(event.endTime);
 
-  const isLive = new Date() >= startDate && new Date() <= endDate;
+  //  status comes from backend
+  const status = event.status || "UPCOMING";
+
+  const isLive = status === "LIVE";
+  const isUpcoming = status === "UPCOMING";
+  const isCompleted = status === "COMPLETED";
+
+  const statusStyles = isLive
+    ? "bg-green-100 text-green-700 border border-green-200"
+    : isUpcoming
+      ? "bg-blue-100 text-blue-700 border border-blue-200"
+      : "bg-gray-200 text-gray-700 border border-gray-300";
+
+  const statusText = isLive
+    ? "Live Now"
+    : isUpcoming
+      ? "Upcoming"
+      : "Completed";
+
+  // progress bar safe
+  const progress =
+    event.maxParticipants > 0
+      ? Math.min((event.totalCheckedIn / event.maxParticipants) * 100, 100)
+      : 0;
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden w-full shadow-md border border-gray-100 hover:-translate-y-1 transition duration-300">
@@ -30,15 +52,9 @@ const EventCard = ({ event }) => {
 
         {/* Status Badge */}
         <span
-          className={`absolute top-3 right-3 text-xs px-3 py-1 rounded-full font-semibold
-            ${
-              isLive
-                ? "bg-green-100 text-green-700"
-                : "bg-gray-200 text-gray-600"
-            }
-          `}
+          className={`absolute top-3 right-3 text-xs px-3 py-1 rounded-full font-bold ${statusStyles}`}
         >
-          {isLive ? "Live Now" : "Upcoming"}
+          {statusText}
         </span>
       </div>
 
@@ -63,16 +79,17 @@ const EventCard = ({ event }) => {
         </div>
 
         {/* Capacity Info */}
-        <div className="mt-3 text-xs text-gray-500">
-          Max Participants: {event.maxParticipants}
+        <div className="mt-3 text-xs text-gray-500 flex justify-between">
+          <span>Checked In: {event.totalCheckedIn}</span>
+          <span>Max: {event.maxParticipants}</span>
         </div>
 
         <div className="mt-2">
-          <div className="w-full bg-gray-200 h-2 rounded-full">
+          <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
             <div
-              className="h-2 bg-blue-600 rounded-full"
+              className="h-2 bg-blue-600 rounded-full transition-all"
               style={{
-                width: `${(event.totalCheckedIn / event.maxParticipants) * 100}%`,
+                width: `${progress}%`,
               }}
             />
           </div>
@@ -81,7 +98,7 @@ const EventCard = ({ event }) => {
         {/* Start Scanning Button */}
         <button
           onClick={() => navigate(`/scan/${event._id}`)}
-          className={`mt-5 w-full cursor-pointer py-2 rounded-lg transition font-semibold text-sm flex items-center justify-center gap-2
+          className={`mt-5 w-full py-2 rounded-lg transition font-semibold text-sm flex items-center justify-center gap-2
             ${
               isLive
                 ? "bg-blue-700 text-white hover:bg-blue-800"
@@ -91,7 +108,7 @@ const EventCard = ({ event }) => {
           disabled={!isLive}
         >
           <QrCode size={18} />
-          Start Scanning
+          {isCompleted ? "Event Completed" : isUpcoming ? "Not Started" : "Start Scanning"}
         </button>
       </div>
     </div>
