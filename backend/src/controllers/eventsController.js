@@ -16,10 +16,14 @@ export async function getAllEvents(req, res) {
         createdAt: -1,
       });
     } else {
-      events = await Event.find().sort({ createdAt: -1 });
+      const now = new Date();
+
+      // participants will see only events that are not expired
+      events = await Event.find({
+        endTime: { $gte: now },
+      }).sort({ startTime: 1 });
     }
 
-    //  Add registrationsCount for each event
     const eventsWithCounts = await Promise.all(
       events.map(async (event) => {
         const registrationsCount = await Participation.countDocuments({
@@ -39,6 +43,7 @@ export async function getAllEvents(req, res) {
     res.status(500).json({ message: "Failed to fetch events" });
   }
 }
+
 
 export async function createEvent(req, res) {
   try {
@@ -133,9 +138,20 @@ export async function getEventDetails(req, res) {
 
     const hasRegistered = !!(await Participation.findOne({ eventId, userId }));
 
-    res.status(200).json({ ...event.toObject(), hasRegistered });
+    const now = new Date();
+
+    const isExpired = now > event.endTime;
+    const isRegistrationClosed = now > event.registrationDeadline;
+
+    res.status(200).json({
+      ...event.toObject(),
+      hasRegistered,
+      isExpired,
+      isRegistrationClosed,
+    });
   } catch (error) {
     console.log("Get Event Details Error:", error);
     res.status(500).json({ message: "Failed to fetch event details" });
   }
 }
+

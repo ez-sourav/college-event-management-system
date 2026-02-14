@@ -164,6 +164,8 @@ export async function getAssignedEvents(req, res) {
 
     const validAssignments = assignments.filter((a) => a.eventId);
 
+    const now = new Date();
+
     const eventsWithStats = await Promise.all(
       validAssignments.map(async (assignment) => {
         const event = assignment.eventId;
@@ -173,11 +175,18 @@ export async function getAssignedEvents(req, res) {
           checkedIn: true,
         });
 
+        let status = "UPCOMING";
+
+        if (now > event.endTime) status = "COMPLETED";
+        else if (now >= event.startTime && now <= event.endTime)
+          status = "LIVE";
+
         return {
           ...event.toObject(),
           totalCheckedIn,
+          status,
         };
-      }),
+      })
     );
 
     return res.status(200).json({
@@ -188,6 +197,7 @@ export async function getAssignedEvents(req, res) {
     return res.status(500).json({ message: "Server error" });
   }
 }
+
 
 // GET /volunteering/:userId  (Admin fetch volunteer assigned events)
 export async function getVolunteerAssignments(req, res) {
