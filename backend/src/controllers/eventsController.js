@@ -73,15 +73,25 @@ export async function deleteEvent(req, res) {
         .json({ message: "Event with this Id doesn't exist" });
     }
 
-    // delete
+    //  delete all participations of this event
+    await Participation.deleteMany({ eventId });
+
+    //  delete all volunteering assignments of this event
+    await Volunteering.deleteMany({ eventId });
+
+    //  finally delete event itself
     await Event.deleteOne({ _id: eventId });
 
-    res.status(200).json({ message: "successfully deleted!" });
+    return res.status(200).json({
+      success: true,
+      message: "Event deleted successfully from everywhere!",
+    });
   } catch (error) {
     console.log("Delete Event Error:", error);
-    res.status(500).json({ message: "Failed to delete event" });
+    return res.status(500).json({ message: "Failed to delete event" });
   }
 }
+
 
 // GET /events/:eventId/participants
 // GET /events/:eventId/analytics

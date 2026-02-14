@@ -28,6 +28,25 @@ const AssignVolunteer = () => {
   const [fetchingAssigned, setFetchingAssigned] = useState(false);
   const [assigning, setAssigning] = useState(false);
 
+  //check status
+  const getEventStatus = (event) => {
+    const now = new Date();
+    const start = new Date(event.startTime);
+    const end = new Date(event.endTime);
+
+    if (now > end) return "COMPLETED";
+    if (now >= start && now <= end) return "LIVE";
+    return "UPCOMING";
+  };
+
+  const getStatusStyle = (status) => {
+    if (status === "LIVE")
+      return "bg-green-100 text-green-700 border-green-200";
+    if (status === "UPCOMING")
+      return "bg-blue-100 text-blue-700 border-blue-200";
+    return "bg-gray-200 text-gray-700 border-gray-300";
+  };
+
   // Fetch volunteers + events
   useEffect(() => {
     const fetchData = async () => {
@@ -72,9 +91,8 @@ const AssignVolunteer = () => {
         );
 
         setAssignedEventIds(
-  (res.data.assignedEventIds || []).map((id) => id.toString()),
-);
-
+          (res.data.assignedEventIds || []).map((id) => id.toString()),
+        );
       } catch (error) {
         console.log("Fetch Assigned Error:", error);
         alert("Failed to fetch assigned events");
@@ -108,9 +126,8 @@ const AssignVolunteer = () => {
   }, [availableEvents, searchEvent]);
 
   const selectedEventObjects = useMemo(() => {
-  return events.filter((event) => selectedEvents.includes(event._id));
-}, [events, selectedEvents]);
-
+    return events.filter((event) => selectedEvents.includes(event._id));
+  }, [events, selectedEvents]);
 
   // Toggle selection
   const handleToggleEvent = (eventId) => {
@@ -122,9 +139,8 @@ const AssignVolunteer = () => {
   };
 
   const handleRemoveSelected = (eventId) => {
-  setSelectedEvents((prev) => prev.filter((id) => id !== eventId));
-};
-
+    setSelectedEvents((prev) => prev.filter((id) => id !== eventId));
+  };
 
   // Assign selected events
   const handleAssign = async () => {
@@ -156,9 +172,8 @@ const AssignVolunteer = () => {
 
       // update assigned list instantly
       setAssignedEventIds((prev) =>
-  Array.from(new Set([...prev, ...selectedEvents])),
-);
-
+        Array.from(new Set([...prev, ...selectedEvents])),
+      );
 
       // clear selection
       setSelectedEvents([]);
@@ -247,14 +262,24 @@ const AssignVolunteer = () => {
                   assignedEvents.map((event) => (
                     <div
                       key={event._id}
-                      className="p-4 rounded-xl border border-emerald-200 bg-emerald-50"
+                      className="p-4 rounded-xl border border-gray-200 bg-gray-50 flex justify-between items-start gap-3"
                     >
-                      <p className="font-black text-gray-900 text-sm sm:text-base">
-                        {event.name}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        📍 {event.venue}
-                      </p>
+                      <div>
+                        <p className="font-black text-gray-900 text-sm sm:text-base">
+                          {event.name}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          📍 {event.venue}
+                        </p>
+                      </div>
+
+                      <span
+                        className={`px-3 py-1 text-xs font-bold rounded-full border ${getStatusStyle(
+                          getEventStatus(event),
+                        )}`}
+                      >
+                        {getEventStatus(event)}
+                      </span>
                     </div>
                   ))
                 ) : (
@@ -300,28 +325,44 @@ const AssignVolunteer = () => {
                   filteredAvailableEvents.map((event) => (
                     <label
                       key={event._id}
-                      className={`p-4 rounded-xl border cursor-pointer flex items-start gap-3 transition
-                        ${
-                          selectedEvents.includes(event._id)
-                            ? "border-blue-600 bg-blue-50"
-                            : "border-gray-200 bg-white hover:bg-gray-50"
-                        }
-                      `}
+                      className={`p-4 rounded-xl border flex items-start gap-3 transition
+    ${
+      selectedEvents.includes(event._id)
+        ? "border-blue-600 bg-blue-50"
+        : "border-gray-200 bg-white hover:bg-gray-50"
+    }
+    ${
+      getEventStatus(event) === "COMPLETED"
+        ? "opacity-60 cursor-not-allowed"
+        : "cursor-pointer"
+    }
+  `}
                     >
                       <input
                         type="checkbox"
                         checked={selectedEvents.includes(event._id)}
+                        disabled={getEventStatus(event) === "COMPLETED"}
                         onChange={() => handleToggleEvent(event._id)}
                         className="mt-1 w-5 h-5 accent-blue-700"
                       />
 
-                      <div>
-                        <p className="font-black text-gray-900 text-sm sm:text-base">
-                          {event.name}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          📍 {event.venue}
-                        </p>
+                      <div className="w-full flex justify-between items-start gap-3">
+                        <div>
+                          <p className="font-black text-gray-900 text-sm sm:text-base">
+                            {event.name}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            📍 {event.venue}
+                          </p>
+                        </div>
+
+                        <span
+                          className={`px-3 py-1 text-xs font-bold rounded-full border ${getStatusStyle(
+                            getEventStatus(event),
+                          )}`}
+                        >
+                          {getEventStatus(event)}
+                        </span>
                       </div>
                     </label>
                   ))
@@ -338,47 +379,42 @@ const AssignVolunteer = () => {
             </div>
 
             {/* Selected Preview */}
-{selectedEventObjects.length > 0 && (
-  <div className="mt-5">
-    <p className="text-sm font-bold text-gray-800 mb-3">
-      Selected Events ({selectedEventObjects.length})
-    </p>
+            {selectedEventObjects.length > 0 && (
+              <div className="mt-5">
+                <p className="text-sm font-bold text-gray-800 mb-3">
+                  Selected Events ({selectedEventObjects.length})
+                </p>
 
-    <div className="flex flex-wrap gap-2">
-      {selectedEventObjects.map((ev) => (
-        <div
-          key={ev._id}
-          className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-xs font-bold border border-blue-200"
-        >
-          <span className="truncate max-w-40">{ev.name}</span>
+                <div className="flex flex-wrap gap-2">
+                  {selectedEventObjects.map((ev) => (
+                    <div
+                      key={ev._id}
+                      className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-xs font-bold border border-blue-200"
+                    >
+                      <span className="truncate max-w-40">{ev.name}</span>
 
-          <button
-            type="button"
-            onClick={() => handleRemoveSelected(ev._id)}
-            className="text-blue-800 hover:text-red-600 font-black"
-          >
-            ✕
-          </button>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
-
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSelected(ev._id)}
+                        className="text-blue-800 hover:text-red-600 font-black"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Assign Button */}
             <button
               onClick={handleAssign}
               disabled={
-                assigning ||
-                !selectedVolunteer ||
-                selectedEvents.length === 0
+                assigning || !selectedVolunteer || selectedEvents.length === 0
               }
               className={`mt-6 w-full h-12 rounded-xl font-bold text-sm shadow-md transition flex items-center justify-center gap-2
                 ${
-                  assigning ||
-                  !selectedVolunteer ||
-                  selectedEvents.length === 0
+                  assigning || !selectedVolunteer || selectedEvents.length === 0
                     ? "bg-gray-300 text-gray-600 cursor-not-allowed"
                     : "bg-blue-700 hover:bg-blue-800 text-white"
                 }

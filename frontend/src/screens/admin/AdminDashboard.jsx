@@ -1,5 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
+
 
 import {
   Search,
@@ -197,7 +199,8 @@ const AdminDashboard = () => {
           };
         });
 
-        setEvents(formattedEvents.filter((e) => e.tag !== "Completed"));
+        setEvents(formattedEvents);
+
       } catch (error) {
         console.log("Dashboard Fetch Error:", error);
       }
@@ -303,6 +306,7 @@ const AdminDashboard = () => {
 
       {/* ================= DASHBOARD CONTENT ================= */}
       <div className="p-3 sm:p-4 lg:p-8 pb-16 sm:pb-20">
+        
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           {stats.map((item, index) => {
@@ -337,7 +341,7 @@ const AdminDashboard = () => {
           {/* Header */}
           <div className="p-4 sm:p-5 lg:p-6 border-b border-slate-200">
             <h3 className="text-base sm:text-lg font-bold text-slate-900">
-              Ongoing & Upcoming Events
+              Events Overview
             </h3>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1">
               Manage capacity and check details for today's schedule.

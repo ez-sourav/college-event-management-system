@@ -90,18 +90,35 @@ const CreateVolunteer = () => {
           },
         });
 
-        const formattedEvents = res.data.events.map((event) => ({
-          id: event._id,
-          title: event.name,
-          status: "Active",
-          statusStyle: "bg-green-100 text-green-800",
-          time: `${new Date(event.startTime).toLocaleString()} - ${new Date(
-            event.endTime,
-          ).toLocaleString()}`,
-          venue: event.venue,
-          selected: false,
-          disabled: false,
-        }));
+        const formattedEvents = res.data.events.map((event) => {
+          const now = new Date();
+          const start = new Date(event.startTime);
+          const end = new Date(event.endTime);
+
+          let status = "UPCOMING";
+          let statusStyle = "bg-blue-100 text-blue-800";
+
+          if (now > end) {
+            status = "COMPLETED";
+            statusStyle = "bg-gray-200 text-gray-700";
+          } else if (now >= start && now <= end) {
+            status = "LIVE";
+            statusStyle = "bg-green-100 text-green-800";
+          }
+
+          return {
+            id: event._id,
+            title: event.name,
+            status,
+            statusStyle,
+            time: formatEventTime(start, end),
+            venue: event.venue,
+            selected: false,
+
+            //  disable completed events selection
+            disabled: status === "COMPLETED",
+          };
+        });
 
         setEvents(formattedEvents);
       } catch (error) {
@@ -224,15 +241,11 @@ const CreateVolunteer = () => {
         events: selectedEvents.map((e) => e.id),
       };
 
-      const res = await axios.post(
-        `${baseURL}/volunteering`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${auth.token}`,
-          },
+      const res = await axios.post(`${baseURL}/volunteering`, payload, {
+        headers: {
+          Authorization: `Bearer ${auth.token}`,
         },
-      );
+      });
 
       alert(res.data.message || "Volunteer created and assigned successfully!");
 
