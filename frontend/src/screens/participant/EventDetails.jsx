@@ -59,16 +59,140 @@ export default function EventDetails() {
   }, [eventId, auth?.token, navigate]);
 
   if (loading)
-    return (
-      <div className="min-h-screen bg-[#f6f6f8] flex items-center justify-center px-4">
-        <div className="bg-white shadow-lg border border-gray-200 rounded-2xl p-7 w-full max-w-md text-center">
-          <p className="text-gray-900 font-black text-lg animate-pulse">
-            Loading Event Details...
-          </p>
-          <p className="text-gray-500 text-sm mt-2">Please wait a moment</p>
+  return (
+    <div className="bg-[#f6f6f8] min-h-screen pb-40">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 animate-pulse">
+        
+        {/* HERO SKELETON */}
+        <div className="relative w-full rounded-3xl overflow-hidden min-h-65 sm:min-h-80 border border-gray-200 shadow-xl bg-gray-200">
+          <div className="absolute inset-0 bg-linear-to-t from-gray-300/70 via-gray-200/40 to-transparent" />
+
+          <div className="relative z-10 p-4 sm:p-8 lg:p-12 flex flex-col lg:flex-row gap-6 lg:items-end justify-between">
+            
+            {/* LEFT */}
+            <div className="flex flex-col gap-3 sm:gap-4 max-w-2xl w-full">
+              <div className="flex gap-2">
+                <div className="h-6 w-24 rounded-full bg-gray-300"></div>
+                <div className="h-6 w-28 rounded-full bg-gray-300"></div>
+              </div>
+
+              <div className="h-8 sm:h-10 w-3/4 rounded-xl bg-gray-300"></div>
+              <div className="h-4 sm:h-5 w-2/3 rounded-lg bg-gray-300"></div>
+
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mt-2">
+                <div className="h-4 w-40 rounded-lg bg-gray-300"></div>
+                <div className="h-4 w-40 rounded-lg bg-gray-300"></div>
+                <div className="h-4 w-28 rounded-lg bg-gray-300"></div>
+              </div>
+            </div>
+
+            {/* RIGHT PRIZE CARD */}
+            <div className="w-full sm:w-auto sm:max-w-sm bg-white/40 backdrop-blur-xl p-5 sm:p-8 rounded-2xl shadow-2xl border border-white/30 flex flex-col items-center justify-center">
+              <div className="h-3 w-32 rounded bg-gray-300 mb-3"></div>
+              <div className="h-8 sm:h-10 w-44 rounded-xl bg-gray-300"></div>
+              <div className="w-full h-px bg-gray-300 my-4"></div>
+              <div className="h-4 w-56 rounded bg-gray-300"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* MAIN GRID SKELETON */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10 mt-10 items-start">
+          
+          {/* LEFT CONTENT */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* About Skeleton */}
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-200">
+              <div className="h-6 w-52 rounded-lg bg-gray-200 mb-4"></div>
+              <div className="space-y-3">
+                <div className="h-4 w-full rounded bg-gray-200"></div>
+                <div className="h-4 w-5/6 rounded bg-gray-200"></div>
+                <div className="h-4 w-4/6 rounded bg-gray-200"></div>
+              </div>
+            </div>
+
+            {/* Prize Skeleton */}
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-200">
+              <div className="h-6 w-52 rounded-lg bg-gray-200 mb-6"></div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl p-5 border border-gray-200 text-center bg-gray-50"
+                  >
+                    <div className="mx-auto size-12 rounded-2xl bg-gray-200 mb-3"></div>
+                    <div className="h-4 w-20 mx-auto rounded bg-gray-200 mb-3"></div>
+                    <div className="h-6 w-28 mx-auto rounded bg-gray-200 mb-3"></div>
+                    <div className="h-3 w-24 mx-auto rounded bg-gray-200"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Rules Skeleton */}
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-200">
+              <div className="h-6 w-64 rounded-lg bg-gray-200 mb-5"></div>
+
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="size-5 rounded-full bg-gray-200"></div>
+                    <div className="h-4 w-full rounded bg-gray-200"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT SIDEBAR */}
+          <div className="lg:col-span-1 space-y-6">
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-200">
+              <div className="h-6 w-32 rounded bg-gray-200 mb-5"></div>
+
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="flex justify-between gap-4">
+                    <div className="h-4 w-20 rounded bg-gray-200"></div>
+                    <div className="h-4 w-24 rounded bg-gray-200"></div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-7 rounded-2xl p-5 border border-gray-200 bg-gray-50">
+                <div className="h-5 w-28 rounded bg-gray-200 mb-3"></div>
+                <div className="h-4 w-full rounded bg-gray-200"></div>
+              </div>
+
+              <div className="mt-6 rounded-2xl p-5 border border-gray-200 bg-gray-50">
+                <div className="h-5 w-40 rounded bg-gray-200 mb-3"></div>
+                <div className="h-4 w-32 rounded bg-gray-200"></div>
+                <div className="h-4 w-44 rounded bg-gray-200 mt-2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Action Bar Skeleton */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 py-4 px-4 sm:px-8 z-50">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <div className="hidden sm:flex flex-col gap-2">
+              <div className="h-4 w-52 rounded bg-gray-200"></div>
+              <div className="h-5 w-40 rounded bg-gray-200"></div>
+            </div>
+
+            <div className="sm:hidden flex flex-col gap-2 w-full">
+              <div className="h-4 w-32 rounded bg-gray-200"></div>
+              <div className="h-5 w-24 rounded bg-gray-200"></div>
+            </div>
+
+            <div className="h-12 w-40 rounded-xl bg-gray-200"></div>
+          </div>
         </div>
       </div>
-    );
+    </div>
+  );
+
 
   if (!event) {
     return (
@@ -151,7 +275,7 @@ export default function EventDetails() {
   }
 
   return (
-    <div className="bg-[#f6f6f8] min-h-screen pb-40">
+    <div className="bg-[#f6f6f8] min-h-screen pb-30">
       {/* CENTER CONTAINER */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10">
         {/* HERO */}
@@ -403,7 +527,7 @@ export default function EventDetails() {
         </div>
       </div>
 
-      {/* FIXED BOTTOM ACTION BAR (DESKTOP + MOBILE ) */}
+      {/* FIXED BOTTOM ACTION BAR (DESKTOP + MOBILE SAME LIKE REF) */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 py-4 px-4 sm:px-8 z-50 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.25)]">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           {/* Left Text */}
