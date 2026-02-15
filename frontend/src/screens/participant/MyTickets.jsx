@@ -85,7 +85,7 @@ const MyTicket = () => {
     pdf.save(`ticket-${id}.pdf`);
   };
 
-  // ✅ Loading Skeleton UI
+  //  Loading Skeleton UI
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f6f6f8] px-4 sm:px-8 lg:px-10 py-8">
@@ -116,7 +116,7 @@ const MyTicket = () => {
     );
   }
 
-  // ✅ Empty State UI
+  //  Empty State UI
   if (!tickets.length) {
     return (
       <div className="min-h-screen bg-[#f6f6f8] flex items-center justify-center px-4">
@@ -164,8 +164,8 @@ const MyTicket = () => {
             return (
               <div
                 key={ticket._id}
-                onClick={() => setSelectedTicket(ticket)}
-                className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition cursor-pointer"
+                
+                className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition "
               >
                 {/* Top Header */}
                 <div className="bg-linear-to-br from-[#1121d4] to-blue-700 px-6 py-5 text-white">
@@ -190,7 +190,9 @@ const MyTicket = () => {
 
                 {/* QR Section */}
                 <div className="p-6 flex flex-col items-center">
-                  <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex items-center justify-center w-full">
+                  <div 
+                  onClick={() => setSelectedTicket(ticket)}
+                  className="bg-gray-50 border border-gray-200 rounded-2xl hover:cursor-zoom-in p-4 flex items-center justify-center w-full">
                     <QRCode value={qrData} size={160} />
                   </div>
 
@@ -208,7 +210,7 @@ const MyTicket = () => {
                       e.stopPropagation();
                       setSelectedTicket(ticket);
                     }}
-                    className="mt-5 w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-800 px-4 py-3 rounded-xl hover:bg-gray-200 transition font-black text-sm border border-gray-200 active:scale-95"
+                    className="mt-5 w-full flex items-center justify-center gap-2 hover:cursor-pointer bg-gray-100 text-gray-800 px-4 py-3 rounded-xl hover:bg-gray-200 transition font-black text-sm border border-gray-200 active:scale-95"
                   >
                     <Eye size={18} />
                     View Ticket
@@ -220,7 +222,7 @@ const MyTicket = () => {
                       e.stopPropagation();
                       handleDownload(ticket._id);
                     }}
-                    className="mt-3 w-full flex items-center justify-center gap-2 bg-[#1121d4] text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition font-black text-sm shadow-md active:scale-95"
+                    className="mt-3 w-full flex items-center hover:cursor-pointer justify-center gap-2 bg-[#1121d4] text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition font-black text-sm shadow-md active:scale-95"
                   >
                     <Download size={18} />
                     Download PDF
@@ -350,7 +352,7 @@ const MyTicket = () => {
                 {/* Download Button */}
                 <button
                   onClick={() => handleDownload(selectedTicket._id)}
-                  className="mt-6 w-full flex items-center justify-center gap-2 bg-[#1121d4] text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition font-black text-sm shadow-md active:scale-95"
+                  className="mt-6 w-full hover:cursor-pointer flex items-center justify-center gap-2 bg-[#1121d4] text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition font-black text-sm shadow-md active:scale-95"
                 >
                   <Download size={18} />
                   Download PDF
