@@ -188,7 +188,7 @@ export default function Navbar() {
 
       {/*  Mobile Sidebar Drawer */}
       <div
-        className={`fixed inset-0 z-50 md:hidden transition-all duration-300 ${
+        className={`fixed inset-0 z-999 md:hidden transition-all duration-300 ${
           openMenu ? "visible" : "invisible"
         }`}
       >
@@ -202,7 +202,7 @@ export default function Navbar() {
 
         {/* Sidebar */}
         <div
-          className={`absolute top-0 left-0 h-full w-72.5 bg-white shadow-2xl border-r border-gray-200 transform transition-transform duration-300 flex flex-col ${
+          className={`absolute top-0 left-0 z-1000 h-full w-72.5 bg-white shadow-2xl border-r border-gray-200 transform transition-transform duration-300 flex flex-col ${
             openMenu ? "translate-x-0" : "-translate-x-full"
           }`}
         >

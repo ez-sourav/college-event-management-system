@@ -174,7 +174,7 @@ export default function EventDetails() {
         </div>
 
         {/* Bottom Action Bar Skeleton */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 py-4 px-4 sm:px-8 z-50">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 py-4 px-4 sm:px-8 z-40">
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
             <div className="hidden sm:flex flex-col gap-2">
               <div className="h-4 w-52 rounded bg-gray-200"></div>
@@ -527,8 +527,8 @@ export default function EventDetails() {
         </div>
       </div>
 
-      {/* FIXED BOTTOM ACTION BAR (DESKTOP + MOBILE SAME LIKE REF) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 py-4 px-4 sm:px-8 z-50 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.25)]">
+      {/* FIXED BOTTOM ACTION BAR (DESKTOP + MOBILE ) */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 py-4 px-4 sm:px-8 z-40 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.25)]">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           {/* Left Text */}
           <div className="hidden sm:flex flex-col">
